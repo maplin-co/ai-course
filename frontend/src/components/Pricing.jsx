@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Check, Zap } from 'lucide-react';
@@ -80,11 +81,10 @@ const Pricing = () => {
           {pricingPlans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative overflow-hidden transition-all duration-300 ${
-                plan.popular
-                  ? 'border-2 border-blue-600 shadow-2xl scale-105 md:scale-110'
-                  : 'border border-gray-200 hover:shadow-xl hover:scale-105'
-              }`}
+              className={`relative overflow-hidden transition-all duration-300 ${plan.popular
+                ? 'border-2 border-blue-600 shadow-2xl scale-105 md:scale-110'
+                : 'border border-gray-200 hover:shadow-xl hover:scale-105'
+                }`}
             >
               {plan.popular && (
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-bl-lg flex items-center gap-1">
@@ -92,7 +92,7 @@ const Pricing = () => {
                   MOST POPULAR
                 </div>
               )}
-              
+
               <CardHeader className="text-center pb-8 pt-8">
                 <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
                   {plan.name}
@@ -107,7 +107,7 @@ const Pricing = () => {
                   {plan.description}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="pb-8">
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
@@ -120,18 +120,19 @@ const Pricing = () => {
                   ))}
                 </ul>
               </CardContent>
-              
+
               <CardFooter>
-                <Button
-                  className={`w-full ${
-                    plan.popular
+                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/signup'} className="w-full">
+                  <Button
+                    className={`w-full ${plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
                       : 'bg-gray-900 hover:bg-gray-800 text-white'
-                  }`}
-                  size="lg"
-                >
-                  {plan.cta}
-                </Button>
+                      }`}
+                    size="lg"
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
           ))}

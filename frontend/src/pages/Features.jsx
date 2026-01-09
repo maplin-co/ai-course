@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
@@ -93,9 +94,11 @@ const Features = () => {
                     <p className="text-gray-400 max-w-2xl mb-12 text-lg">
                         Join the 35,000+ businesses who have already switched to LearnFlow. Our platform provides everything you need to grow—no plugins or extra developers required.
                     </p>
-                    <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-12 h-16 rounded-2xl text-xl">
-                        Start Free Now
-                    </Button>
+                    <Link to="/signup">
+                        <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-12 h-16 rounded-2xl text-xl">
+                            Start Free Now
+                        </Button>
+                    </Link>
                 </div>
             </section>
 
