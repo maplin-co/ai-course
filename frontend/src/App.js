@@ -24,7 +24,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </div >
   );
 }
