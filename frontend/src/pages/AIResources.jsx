@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Brain, Sparkles, Wand2, MessageSquare, Layout, Globe, Zap, Shield } from 'lucide-react';
+import { Brain, Sparkles, Wand2, MessageSquare, Layout, Globe, Zap, Shield, Cpu, Users } from 'lucide-react';
 
 const AIResources = () => {
     const aiTools = [

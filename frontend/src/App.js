@@ -23,6 +23,7 @@ function App() {
           <Route path="/ai-resources" element={<AIResources />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </HashRouter>
     </div >
