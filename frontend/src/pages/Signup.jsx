@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
+    const navigate = useNavigate();
+
+    const handleSignup = (e) => {
+        e.preventDefault();
+        // Since we don't have a real backend connected yet, we'll simulate a successful signup
+        navigate('/dashboard');
+    };
     return (
         <div className="bg-gray-50 flex min-h-screen">
             {/* Left side: Value Prop */}
@@ -64,7 +71,7 @@ const Signup = () => {
                     <h2 className="text-3xl font-bold mb-2">Create Your Account</h2>
                     <p className="text-gray-500 mb-10">Choose your path and start your zero-risk trial.</p>
 
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    <form className="space-y-6" onSubmit={handleSignup}>
                         <div className="grid grid-cols-2 gap-4 mb-8">
                             <label className="relative cursor-pointer">
                                 <input type="radio" name="plan" className="peer hidden" defaultChecked />

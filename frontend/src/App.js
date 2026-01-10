@@ -8,6 +8,7 @@ import About from "./pages/About";
 import AIResources from "./pages/AIResources";
 import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/ai-resources" element={<AIResources />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </HashRouter>
