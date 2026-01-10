@@ -9,6 +9,9 @@ import AIResources from "./pages/AIResources";
 import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import CourseBuilder from "./pages/CourseBuilder";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/course-builder" element={<CourseBuilder />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </HashRouter>

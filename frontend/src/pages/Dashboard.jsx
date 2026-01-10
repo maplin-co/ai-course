@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
     return (
@@ -16,20 +17,26 @@ const Dashboard = () => {
                         Your academy has been successfully launched. This is a demo dashboard for the prototype.
                     </p>
                     <div className="grid md:grid-cols-3 gap-6 text-left max-w-4xl mx-auto">
-                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50">
+                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg transition-all group">
                             <div className="font-bold text-lg mb-2">Course Builder</div>
                             <p className="text-sm text-gray-500 mb-4">Start creating your first AI-generated course.</p>
-                            <button className="text-blue-600 font-bold text-sm hover:underline">Launch Tool →</button>
+                            <Link to="/course-builder" className="text-blue-600 font-bold text-sm hover:underline flex items-center">
+                                Launch Tool <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                            </Link>
                         </div>
-                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50">
+                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg transition-all group">
                             <div className="font-bold text-lg mb-2">Student Analytics</div>
                             <p className="text-sm text-gray-500 mb-4">Track progress and engagement in real-time.</p>
-                            <button className="text-blue-600 font-bold text-sm hover:underline">View Stats →</button>
+                            <Link to="/analytics" className="text-blue-600 font-bold text-sm hover:underline flex items-center">
+                                View Stats <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                            </Link>
                         </div>
-                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50">
+                        <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg transition-all group">
                             <div className="font-bold text-lg mb-2">Settings</div>
                             <p className="text-sm text-gray-500 mb-4">Configure your domain and payment methods.</p>
-                            <button className="text-blue-600 font-bold text-sm hover:underline">Manage →</button>
+                            <Link to="/settings" className="text-blue-600 font-bold text-sm hover:underline flex items-center">
+                                Manage <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                            </Link>
                         </div>
                     </div>
                 </div>
