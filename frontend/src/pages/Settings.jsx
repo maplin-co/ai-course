@@ -20,57 +20,66 @@ const Settings = () => {
                         <button className="px-8 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50">API Keys</button>
                     </div>
 
-                    <div className="p-8 space-y-8">
-                        {/* Profile Section */}
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-4">Profile Information</h3>
-                            <div className="flex items-center mb-6">
-                                <div className="w-20 h-20 rounded-full bg-gray-200 mr-6"></div>
-                                <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Upload New Photo</button>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">First Name</label>
-                                    <input type="text" defaultValue="John" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Last Name</label>
-                                    <input type="text" defaultValue="Doe" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
-                                    <input type="email" defaultValue="john.doe@example.com" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                            </div>
-                        </div>
+                    <div className="flex border-b border-gray-100">
+                        <button
+                            onClick={() => setActiveTab('general')}
+                            className={`px-8 py-4 font-medium text-sm transition-colors ${activeTab === 'general' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                        >
+                            General
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('billing')}
+                            className={`px-8 py-4 font-medium text-sm transition-colors ${activeTab === 'billing' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-900'}`}
+                        >
+                            Billing
+                        </button>
+                        <button className="px-8 py-4 font-medium text-sm text-gray-500 hover:text-gray-900 transition-colors">Team</button>
+                        <button className="px-8 py-4 font-medium text-sm text-gray-500 hover:text-gray-900 transition-colors">API Keys</button>
+                    </div>
 
-                        <div className="border-t border-gray-100 pt-8">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4">Preferences</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-bold text-gray-700">Email Notifications</p>
-                                        <p className="text-xs text-gray-500">Receive weekly digests about your academy performance.</p>
+                    <div className="p-8">
+                        {activeTab === 'general' ? (
+                            <div className="space-y-6 max-w-xl">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                    <input type="text" defaultValue="Alex Johnson" className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-all" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                    <input type="email" defaultValue="alex@example.com" className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-500 transition-all" />
+                                </div>
+                                <div className="pt-4 border-t border-gray-100">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">Email Notifications</h4>
+                                            <p className="text-sm text-gray-500">Receive weekly digests</p>
+                                        </div>
+                                        <div className="w-12 h-6 bg-blue-600 rounded-full relative cursor-pointer">
+                                            <div className="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div>
+                                        </div>
                                     </div>
-                                    <div className="w-12 h-6 bg-blue-600 rounded-full relative cursor-pointer">
-                                        <div className="absolute top-1 right-1 w-4 h-4 bg-white rounded-full"></div>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">Marketing Emails</h4>
+                                            <p className="text-sm text-gray-500">Receive product updates</p>
+                                        </div>
+                                        <div className="w-12 h-6 bg-gray-200 rounded-full relative cursor-pointer">
+                                            <div className="w-4 h-4 bg-white rounded-full absolute left-1 top-1"></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-bold text-gray-700">Two-Factor Authentication</p>
-                                        <p className="text-xs text-gray-500">Add an extra layer of security to your account.</p>
-                                    </div>
-                                    <div className="w-12 h-6 bg-gray-200 rounded-full relative cursor-pointer">
-                                        <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full"></div>
-                                    </div>
+                                <div className="pt-6">
+                                    <button className="bg-blue-600 text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                                        Save Changes
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="border-t border-gray-100 pt-8 flex justify-end">
-                            <button className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30">Save Changes</button>
-                        </div>
+                        ) : (
+                            <div>
+                                <h2 className="text-xl font-bold mb-6">Manage Subscription</h2>
+                                <PaymentSettings />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
