@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PaymentSettings from '../components/PaymentSettings';
 
 const Settings = () => {
+    const [activeTab, setActiveTab] = useState('general');
+
     return (
         <div className="min-h-screen bg-gray-50 pt-24 pb-12">
             <Header />
@@ -13,13 +16,6 @@ const Settings = () => {
                 </div>
 
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="flex flex-col md:flex-row border-b border-gray-100">
-                        <button className="px-8 py-4 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50">General</button>
-                        <button className="px-8 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50">Billing</button>
-                        <button className="px-8 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50">Team</button>
-                        <button className="px-8 py-4 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50">API Keys</button>
-                    </div>
-
                     <div className="flex border-b border-gray-100">
                         <button
                             onClick={() => setActiveTab('general')}
