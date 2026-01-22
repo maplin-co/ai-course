@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 import os
 import logging
 from backend.database import close_mongo_connection
-from backend.routers import auth, resources
+from backend.routers import auth, resources, payments
 
 # App init
 app = FastAPI()
@@ -27,6 +27,7 @@ async def root():
 # Include sub-routers
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(resources.router, prefix="/resources", tags=["resources"])
+api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 
 app.include_router(api_router)
 
