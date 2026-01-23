@@ -1,0 +1,63 @@
+steps:
+  # 1. Install frontend dependencies
+  - name: 'node:18'
+    id: 'frontend-install'
+    entrypoint: 'npm'
+    args: ['install']
+    dir: 'frontend'
+
+  # 2. Build frontend
+  - name: 'node:18'
+    id: 'frontend-build'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+    dir: 'frontend'
+
+  # 3. Prepare backend static directory
+  - name: 'debian'
+    id: 'prepare-static'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        mkdir -p backend/static
+        cp -r frontend/build/* backend/static/
+        # Also include our refined premium HTML files if they aren't in the build
+        if [ -d "frontend/public" ]; then
+          cp -r frontend/public/*.html backend/static/ || true
+        fi
+
+  # 4. Build Backend Docker Image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'backend-docker-build'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/ai-course-builder', './backend']
+
+  # 5. Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'backend-docker-push'
+    args: ['push', 'gcr.io/$PROJECT_ID/ai-course-builder']
+
+  # 6. Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-to-cloud-run'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ai-course-builder'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/ai-course-builder'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'PORT=8080'
+
+images:
+  - 'gcr.io/$PROJECT_ID/ai-course-builder'
+
+timeout: '1200s'
+options:
+  logging: CLOUD_LOGGING_ONLY
