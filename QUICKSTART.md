@@ -173,7 +173,7 @@ ai-course-1/
 - ✅ Google Pay
 - ✅ Subscriptions (recurring)
 - ✅ One-time payments
-- ✅ 30-day free trials
+- ✅ 7-day free trials
 - ✅ Subscription management
 - ✅ Webhook events
 

@@ -25,7 +25,7 @@
 #### Payment Features
 
 - ✅ Multiple pricing tiers (Starter, Professional, Enterprise)
-- ✅ 30-day free trial support
+- ✅ 7-day free trial support
 - ✅ Monthly and yearly billing options
 - ✅ Secure Stripe Checkout
 - ✅ Payment success/failure handling

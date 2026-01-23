@@ -225,6 +225,286 @@
         </div>
     </footer>
 
+    <script>
+        // Drag and Drop Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar');
+            const editorArea = document.querySelector('.editor-area > div');
+            const dragHandles = document.querySelectorAll('.drag-handle');
+            const nodes = document.querySelectorAll('.node');
+
+            let draggedElement = null;
+            let draggedType = null;
+
+            // Make sidebar components draggable
+            dragHandles.forEach(handle => {
+                handle.setAttribute('draggable', 'true');
+
+                handle.addEventListener('dragstart', function (e) {
+                    draggedElement = this;
+                    draggedType = 'component';
+                    this.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('text/html', this.innerHTML);
+                });
+
+                handle.addEventListener('dragend', function (e) {
+                    this.style.opacity = '1';
+                    draggedElement = null;
+                });
+            });
+
+            // Make existing nodes draggable and sortable
+            nodes.forEach(node => {
+                node.setAttribute('draggable', 'true');
+
+                node.addEventListener('dragstart', function (e) {
+                    draggedElement = this;
+                    draggedType = 'node';
+                    this.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                node.addEventListener('dragend', function (e) {
+                    this.style.opacity = '1';
+                    draggedElement = null;
+                    // Remove all drag-over classes
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                });
+
+                node.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    if (draggedType === 'node' && draggedElement !== this) {
+                        this.classList.add('drag-over');
+                    }
+                });
+
+                node.addEventListener('dragleave', function (e) {
+                    this.classList.remove('drag-over');
+                });
+
+                node.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+
+                    if (draggedType === 'node' && draggedElement !== this) {
+                        // Swap positions
+                        const allNodes = Array.from(editorArea.querySelectorAll('.node'));
+                        const draggedIndex = allNodes.indexOf(draggedElement);
+                        const targetIndex = allNodes.indexOf(this);
+
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+                    }
+                });
+            });
+
+            // Make editor area droppable
+            editorArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                this.style.borderColor = '#3b82f6';
+                this.style.backgroundColor = '#eff6ff';
+            });
+
+            editorArea.addEventListener('dragleave', function (e) {
+                if (e.target === this) {
+                    this.style.borderColor = '';
+                    this.style.backgroundColor = '';
+                }
+            });
+
+            editorArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.style.borderColor = '';
+                this.style.backgroundColor = '';
+
+                if (draggedType === 'component' && draggedElement) {
+                    // Get component name
+                    const componentName = draggedElement.querySelector('span:last-child').textContent;
+                    const componentIcon = draggedElement.querySelector('span:first-child').textContent;
+
+                    // Create new node
+                    const newNode = document.createElement('div');
+                    newNode.className = 'node p-5 bg-white rounded-2xl shadow-sm border border-gray-100';
+                    newNode.setAttribute('draggable', 'true');
+
+                    const moduleNumber = editorArea.querySelectorAll('.node').length + 1;
+
+                    newNode.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center">
+                                <span class="text-blue-600 font-bold mr-3">${moduleNumber}.0</span>
+                                <h4 class="font-bold text-lg">New ${componentName}</h4>
+                            </div>
+                            <button class="text-gray-300 hover:text-red-500 delete-node" title="Delete">🗑️</button>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-gray-50 rounded-lg text-sm flex items-center">
+                                <span class="mr-3">${componentIcon}</span> ${componentName} Content
+                            </div>
+                        </div>
+                    `;
+
+                    // Insert before AI insertion point
+                    const aiPoint = editorArea.querySelector('.border-blue-100');
+                    editorArea.insertBefore(newNode, aiPoint);
+
+                    // Add drag functionality to new node
+                    addNodeDragFunctionality(newNode);
+
+                    // Add delete functionality
+                    newNode.querySelector('.delete-node').addEventListener('click', function () {
+                        if (confirm('Delete this module?')) {
+                            newNode.remove();
+                            renumberModules();
+                        }
+                    });
+
+                    // Show success message
+                    showNotification(`${componentName} added successfully!`);
+                }
+            });
+
+            // Function to add drag functionality to new nodes
+            function addNodeDragFunctionality(node) {
+                node.addEventListener('dragstart', function (e) {
+                    draggedElement = this;
+                    draggedType = 'node';
+                    this.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                node.addEventListener('dragend', function (e) {
+                    this.style.opacity = '1';
+                    draggedElement = null;
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                });
+
+                node.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    if (draggedType === 'node' && draggedElement !== this) {
+                        this.classList.add('drag-over');
+                    }
+                });
+
+                node.addEventListener('dragleave', function (e) {
+                    this.classList.remove('drag-over');
+                });
+
+                node.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+
+                    if (draggedType === 'node' && draggedElement !== this) {
+                        const allNodes = Array.from(editorArea.querySelectorAll('.node'));
+                        const draggedIndex = allNodes.indexOf(draggedElement);
+                        const targetIndex = allNodes.indexOf(this);
+
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+                        renumberModules();
+                    }
+                });
+            }
+
+            // Function to renumber modules
+            function renumberModules() {
+                const allNodes = editorArea.querySelectorAll('.node');
+                allNodes.forEach((node, index) => {
+                    const numberSpan = node.querySelector('.text-blue-600');
+                    if (numberSpan) {
+                        numberSpan.textContent = `${index + 1}.0`;
+                    }
+                });
+            }
+
+            // Function to show notification
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-slide-in';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+
+            // Add delete functionality to existing nodes
+            nodes.forEach(node => {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-gray-300 hover:text-red-500 delete-node ml-2';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.title = 'Delete';
+
+                const header = node.querySelector('.flex.justify-between');
+                if (header && !header.querySelector('.delete-node')) {
+                    const rightSection = header.querySelector('button');
+                    if (rightSection) {
+                        rightSection.parentNode.insertBefore(deleteBtn, rightSection);
+                    } else {
+                        header.appendChild(deleteBtn);
+                    }
+                }
+
+                deleteBtn.addEventListener('click', function () {
+                    if (confirm('Delete this module?')) {
+                        node.remove();
+                        renumberModules();
+                        showNotification('Module deleted');
+                    }
+                });
+            });
+
+            // AI Generator click handler
+            const aiGenerator = document.querySelector('.border-blue-100.bg-blue-50\\/30');
+            if (aiGenerator) {
+                aiGenerator.addEventListener('click', function () {
+                    showNotification('AI generation feature coming soon!');
+                    // In production, this would call your AI API
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background: #eff6ff !important;
+            transform: scale(1.02);
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+    </style>
+
 </body>
 
 </html>

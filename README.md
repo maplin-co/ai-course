@@ -17,7 +17,7 @@ LearnFlow is a production-ready, all-in-one platform for building and scaling on
 - ✅ Stripe Integration (Credit Cards, Apple Pay, Google Pay)
 - ✅ Subscription Management
 - ✅ One-time Payments
-- ✅ 30-day Free Trials
+- ✅ 7-day Free Trials
 - ✅ Secure Checkout Flow
 - ✅ Webhook Support for Payment Events
 - ✅ Multiple Pricing Tiers
