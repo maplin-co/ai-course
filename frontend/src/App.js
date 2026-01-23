@@ -7,7 +7,10 @@ import Pricing from "./pages/Pricing";
 import About from "./pages/About";
 import AIResources from "./pages/AIResources";
 import Contact from "./pages/Contact";
+import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Checkout from "./pages/Checkout";
+import Success from "./pages/Success";
 import Dashboard from "./pages/Dashboard";
 import CourseBuilder from "./pages/CourseBuilder";
 import Analytics from "./pages/Analytics";
@@ -27,6 +30,9 @@ function App() {
           <Route path="/ai-resources" element={<AIResources />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/success" element={<Success />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/course-builder" element={<CourseBuilder />} />
           <Route path="/analytics" element={<Analytics />} />
@@ -34,7 +40,7 @@ function App() {
           <Route path="*" element={<Home />} />
         </Routes>
       </HashRouter>
-    </div >
+    </div>
   );
 }
 

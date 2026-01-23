@@ -136,12 +136,12 @@ const Signup = () => {
 
                         <button type="submit"
                             className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/20 hover:bg-gray-800 transition-all flex items-center justify-center group">
-                            Start My 30-Day Free Trial
+                            Start My 7-Day Free Trial
                             <span className="ml-3 group-hover:translate-x-1 transition-transform">→</span>
                         </button>
                     </form>
 
-                    <p className="text-center mt-10 text-sm text-gray-500">Already have an account? <Link to="#"
+                    <p className="text-center mt-10 text-sm text-gray-500">Already have an account? <Link to="/login"
                         className="text-blue-600 font-bold">Sign In</Link></p>
                 </div>
             </div>

@@ -47,7 +47,7 @@ const Header = () => {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/signup">
+            <Link to="/login">
               <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
                 Sign in
               </Button>
@@ -83,12 +83,12 @@ const Header = () => {
                 </Link>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t">
-                <Link to="/signup">
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     Sign in
                   </Button>
                 </Link>
-                <Link to="/signup">
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     Start free trial
                   </Button>

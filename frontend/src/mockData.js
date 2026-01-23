@@ -9,7 +9,7 @@ export const navigationLinks = [
 export const heroData = {
   title: "Powering the world's top learning businesses",
   subtitle: "Transform your expertise into courses, communities, and other high-quality learning experiences. Our platform is designed to drive revenue growth for businesses like yours.",
-  primaryCTA: "Start free trial",
+  primaryCTA: "Start 7-Day Free Trial",
   secondaryCTA: "Talk to sales",
   trustBadge: "Trusted by over 35,000 customers",
   backgroundImage: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwyfHxvbmxpbmUlMjBsZWFybmluZ3xlbnwwfHx8fDE3Njc5NzU4MDN8MA&ixlib=rb-4.1.0&q=85"

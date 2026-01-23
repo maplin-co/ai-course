@@ -72,7 +72,7 @@ const Pricing = () => {
             Simple, transparent pricing
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the perfect plan for your learning business. All plans include a 14-day free trial.
+            Choose the perfect plan for your learning business. All plans include a 7-day free trial.
           </p>
         </div>
 
@@ -122,7 +122,7 @@ const Pricing = () => {
               </CardContent>
 
               <CardFooter>
-                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/signup'} className="w-full">
+                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/checkout'} className="w-full">
                   <Button
                     className={`w-full ${plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
@@ -141,7 +141,7 @@ const Pricing = () => {
         {/* Additional Info */}
         <div className="mt-12 text-center">
           <p className="text-gray-600">
-            All plans include 14-day free trial • No credit card required • Cancel anytime
+            All plans include 7-day free trial • No credit card required • Cancel anytime
           </p>
         </div>
       </div>

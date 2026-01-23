@@ -320,7 +320,25 @@ const CourseBuilder = () => {
                                 </button>
 
                                 {/* AI Insertion Point */}
-                                <div className="mt-6 py-8 text-center border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/30 cursor-pointer hover:bg-blue-50 transition-colors">
+                                <div
+                                    onClick={() => {
+                                        const templates = [
+                                            { type: 'video', title: 'Modern Design Principles', icon: '📽️' },
+                                            { type: 'text', title: 'User Experience Mastery', icon: '📄' },
+                                            { type: 'quiz', title: 'Knowledge Assessment', icon: '❓' }
+                                        ];
+
+                                        const newModules = templates.map((tpl, index) => ({
+                                            id: `gen-${Date.now()}-${index}`,
+                                            title: tpl.title,
+                                            content: [{ type: tpl.type, text: `AI Generated ${tpl.type} content`, icon: tpl.icon }]
+                                        }));
+
+                                        setModules(prev => [...prev, ...newModules]);
+                                        alert('FlowAI has generated 3 new modules based on your course topic!');
+                                    }}
+                                    className="mt-6 py-8 text-center border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/30 cursor-pointer hover:bg-blue-50 transition-colors"
+                                >
                                     <div className="inline-flex items-center text-blue-600 font-bold">
                                         <span className="mr-2">✨</span> Generate next 3 modules with FlowAI
                                     </div>
