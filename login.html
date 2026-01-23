@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | LearnFlow</title>
-    <meta name="description" content="Create your LearnFlow account and start building your education business today">
+    <title>Sign In | LearnFlow</title>
+    <meta name="description" content="Sign in to your LearnFlow account to manage your courses and students">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -37,21 +37,13 @@
                     L</div>
                 <span class="text-2xl font-bold gradient-text">LearnFlow</span>
             </a>
-            <h1 class="text-3xl font-bold mb-2">Create your account</h1>
-            <p class="text-gray-600">Start your 7-day free trial. No credit card required.</p>
+            <h1 class="text-3xl font-bold mb-2">Welcome back</h1>
+            <p class="text-gray-600">Sign in to your account to continue</p>
         </div>
 
-        <!-- Sign Up Form -->
+        <!-- Sign In Form -->
         <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-            <form id="signup-form" class="space-y-6">
-                <!-- Full Name -->
-                <div>
-                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                    <input type="text" id="name" name="name" required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
-                        placeholder="John Doe">
-                </div>
-
+            <form id="login-form" class="space-y-6">
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
@@ -62,27 +54,29 @@
 
                 <!-- Password -->
                 <div>
-                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+                        <a href="#" id="forgot-password" class="text-xs text-blue-600 hover:underline">Forgot
+                            password?</a>
+                    </div>
                     <input type="password" id="password" name="password" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
                         placeholder="••••••••">
-                    <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
                 </div>
 
-                <!-- Terms -->
-                <div class="flex items-start">
-                    <input type="checkbox" id="terms" name="terms" required
-                        class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                    <label for="terms" class="ml-2 text-sm text-gray-600">
-                        I agree to the <a href="terms.html" class="text-blue-600 hover:underline">Terms of Service</a>
-                        and <a href="privacy.html" class="text-blue-600 hover:underline">Privacy Policy</a>
+                <!-- Remember Me -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" name="remember"
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="remember" class="ml-2 text-sm text-gray-600">
+                        Remember me for 30 days
                     </label>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit"
                     class="w-full py-4 rounded-xl font-bold gradient-border text-white hover:opacity-90 transition shadow-xl shadow-blue-500/25">
-                    Create Account
+                    Sign In
                 </button>
             </form>
 
@@ -96,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- Social Sign Up -->
+            <!-- Social Sign In -->
             <div class="grid grid-cols-2 gap-4">
                 <button type="button"
                     class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">
@@ -122,59 +116,47 @@
                 </button>
             </div>
 
-            <!-- Sign In Link -->
+            <!-- Sign Up Link -->
             <p class="text-center text-sm text-gray-600 mt-6">
-                Already have an account?
-                <a href="login.html" class="text-blue-600 font-semibold hover:underline">Sign in</a>
+                Don't have an account?
+                <a href="signup.html" class="text-blue-600 font-semibold hover:underline">Sign up for free</a>
             </p>
         </div>
 
-        <!-- Benefits -->
-        <div class="mt-8 bg-white rounded-2xl p-6 border border-gray-200">
-            <h3 class="font-bold mb-4 text-center">What you'll get:</h3>
-            <ul class="space-y-3">
-                <li class="flex items-center text-sm">
-                    <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    7-day free trial with full access
-                </li>
-                <li class="flex items-center text-sm">
-                    <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    AI-powered course builder
-                </li>
-                <li class="flex items-center text-sm">
-                    <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    No credit card required
-                </li>
-                <li class="flex items-center text-sm">
-                    <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Cancel anytime
-                </li>
-            </ul>
+        <!-- Security Notice -->
+        <div class="mt-6 text-center">
+            <p class="text-xs text-gray-500">
+                🔒 Your data is protected with industry-standard encryption
+            </p>
         </div>
     </div>
 
     <script>
-        document.getElementById('signup-form').addEventListener('submit', function (e) {
+        document.getElementById('login-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
 
             // In production, send to backend API
-            console.log('Sign up:', { name, email, password });
+            console.log('Login:', { email, password, remember });
 
-            // For now, redirect to checkout
-            alert('Account created successfully! Redirecting to choose your plan...');
-            window.location.href = 'checkout.html';
+            // For now, simulate successful login and redirect to dashboard
+            // In production, this would:
+            // 1. POST to /api/auth/login
+            // 2. Receive JWT token
+            // 3. Store token in localStorage/cookie
+            // 4. Redirect to dashboard
+
+            alert('Login successful! Redirecting to your dashboard...');
+            // Redirect to course builder as a demo
+            window.location.href = 'frontend/public/course-builder.html';
+        });
+
+        document.getElementById('forgot-password').addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Password reset functionality coming soon!\n\nIn production, this would:\n1. Ask for your email\n2. Send a reset link\n3. Allow you to create a new password');
         });
     </script>
 
