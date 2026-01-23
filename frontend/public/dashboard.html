@@ -22,6 +22,7 @@
         .gradient-text {
             background: linear-gradient(135deg, #2563eb, #9333ea);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -71,8 +72,10 @@
             </div>
         </nav>
 
-        <div class="pt-8 border-t border-white/5">
-            <a href="preview.html" class="text-xs text-gray-500 hover:text-white">View Live Site →</a>
+        <div class="pt-8 border-t border-white/5 space-y-4">
+            <a href="preview.html" class="block text-xs text-gray-500 hover:text-white transition">View Live Site →</a>
+            <button onclick="handleLogout()" class="block text-xs text-red-400 hover:text-red-300 transition">Sign
+                Out</button>
         </div>
     </aside>
 
@@ -205,6 +208,35 @@
         </div>
     </main>
 
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.getMe();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update greeting
+            const greetingName = document.querySelector('h1 .gradient-text');
+            if (greetingName && user.full_name) {
+                greetingName.textContent = user.full_name.split(' ')[0];
+            }
+
+            // Update user initial
+            const userAvatar = document.querySelector('header .w-10');
+            if (userAvatar && user.full_name) {
+                userAvatar.textContent = user.full_name.charAt(0).toUpperCase();
+            }
+        });
+
+        // Logout function for the sidebar
+        function handleLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                auth.logout();
+            }
+        }
+    </script>
 </body>
 
 </html>

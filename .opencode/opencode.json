@@ -1,0 +1,820 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "build": {
+      "description": "Primary development agent with full codebase access",
+      "model": "opencode/big-pickle"
+    },
+    "compaction": {
+      "description": "Session summarizer for context continuity across compactions",
+      "model": "opencode/big-pickle"
+    },
+    "explore": {
+      "description": "Fast codebase search specialist",
+      "model": "opencode/grok-code"
+    },
+    "general": {
+      "description": "General-purpose subagent for fast, well-defined tasks; delegates complexity quickly",
+      "model": "opencode/grok-code"
+    },
+    "looker": {
+      "description": "Media extraction specialist for images, PDFs, diagrams",
+      "model": "opencode/gpt-5-nano"
+    },
+    "plan": {
+      "description": "Primary planning agent for architecture and multi-phase execution",
+      "model": "opencode/big-pickle"
+    },
+    "review": {
+      "description": "Code review, debugging, and security audit specialist",
+      "model": "opencode/big-pickle"
+    },
+    "scout": {
+      "description": "External research specialist for library docs and patterns",
+      "model": "opencode/big-pickle"
+    },
+    "vision": {
+      "description": "Visual content specialist for multimodal analysis and UI/UX guidance",
+      "model": "opencode/gpt-5-nano"
+    },
+    "painter": {
+      "description": "Image generation and editing specialist using Gemini 3 Pro Image. Use for creating UI mockups, app icons, hero images, visual assets, and editing/redacting existing images",
+      "model": "opencode/gpt-5-nano"
+    }
+  },
+  "autoupdate": false,
+  "compaction": {
+    "auto": true,
+    "prune": true
+  },
+  "experimental": {},
+  "formatter": {
+    "biome": {
+      "command": [
+        "npx",
+        "@biomejs/biome",
+        "check",
+        "--write",
+        "$FILE"
+      ],
+      "extensions": [
+        ".js",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".json",
+        ".jsonc"
+      ]
+    },
+    "cargo-fmt": {
+      "command": [
+        "cargo",
+        "fmt",
+        "--",
+        "$FILE"
+      ],
+      "extensions": [
+        ".rs"
+      ]
+    },
+    "java-formatter": {
+      "command": [
+        "google-java-format",
+        "--replace",
+        "$FILE"
+      ],
+      "environment": {
+        "JAVA_HOME": "{env:JAVA_HOME}"
+      },
+      "extensions": [
+        ".java"
+      ]
+    },
+    "oxfmt": {
+      "command": [
+        "npx",
+        "oxfmt",
+        "--write",
+        "$FILE"
+      ],
+      "extensions": [
+        ".js",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".json",
+        ".jsonc",
+        ".html",
+        ".css",
+        ".scss",
+        ".sass",
+        ".md",
+        ".mdx",
+        ".yaml",
+        ".yml"
+      ]
+    },
+    "laravel-pint": {
+      "command": [
+        "npx",
+        "laravel-pint",
+        "--preset",
+        "psr12",
+        "$FILE"
+      ],
+      "extensions": [
+        ".php"
+      ]
+    }
+  },
+  "instructions": [
+    ".opencode/memory/user.md",
+    ".opencode/memory/project/*.md"
+  ],
+  "keybinds": {
+    "command_list": ";",
+    "leader": "`",
+    "session_child_cycle": "ctrl+alt+right",
+    "session_child_cycle_reverse": "ctrl+alt+left",
+    "session_compact": "ctrl+k"
+  },
+  "mcp": {
+    "context7": {
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "{env:CONTEXT7_API_KEY}"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "gh_grep": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://mcp.grep.app"
+    },
+    "stitch": {
+      "enabled": false,
+      "type": "remote",
+      "url": "https://stitch.googleapis.com/mcp",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:STITCH_ACCESS_TOKEN}",
+        "X-Goog-User-Project": "{env:GOOGLE_CLOUD_PROJECT}"
+      }
+    }
+  },
+  "model": "opencode/big-pickle",
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "cat *": "allow",
+      "git branch *": "allow",
+      "git commit *": "ask",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git push *": "ask",
+      "git rebase *": "ask",
+      "git reset *": "ask",
+      "git status *": "allow",
+      "ls *": "allow",
+      "npm *": "allow",
+      "npx *": "allow",
+      "rm *": "deny",
+      "rm -rf *": "deny",
+      "sudo *": "deny"
+    },
+    "doom_loop": "ask",
+    "edit": "allow",
+    "external_directory": "ask",
+    "question": "allow",
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    }
+  },
+  "plugin": [
+    "@tarquinen/opencode-dcp@latest",
+    "@franlol/opencode-md-table-formatter@0.0.3"
+  ],
+  "provider": {
+    "github-copilot": {
+      "models": {
+        "claude-opus-4.5": {
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "variants": {
+            "high": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 32000,
+                  "type": "enabled"
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 16000,
+                  "type": "enabled"
+                }
+              }
+            }
+          }
+        },
+        "claude-sonnet-4.5": {
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "variants": {
+            "high": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 16000,
+                  "type": "enabled"
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 8000,
+                  "type": "enabled"
+                }
+              }
+            }
+          }
+        },
+        "claude-haiku-4.5": {
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "variants": {
+            "high": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 32000,
+                  "type": "enabled"
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinking": {
+                  "budgetTokens": 16000,
+                  "type": "enabled"
+                }
+              }
+            }
+          }
+        },
+        "gpt-5-mini": {
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "variants": {
+            "high": {
+              "options": {
+                "reasoning": {
+                  "effort": "high"
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "reasoning": {
+                  "effort": "medium"
+                }
+              }
+            },
+            "low": {
+              "options": {
+                "reasoning": {
+                  "effort": "low"
+                }
+              }
+            }
+          }
+        },
+        "gpt-5.2-codex": {
+          "attachment": true,
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "variants": {
+            "high": {
+              "options": {
+                "reasoning": {
+                  "effort": "high"
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "reasoning": {
+                  "effort": "medium"
+                }
+              }
+            },
+            "low": {
+              "options": {
+                "reasoning": {
+                  "effort": "low"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "openai": {
+      "models": {
+        "gpt-5.2": {
+          "variants": {
+            "fast": {
+              "disabled": true
+            },
+            "high": {
+              "include": [
+                "reasoning.encrypted_content"
+              ],
+              "reasoningEffort": "high",
+              "reasoningSummary": "auto",
+              "textVerbosity": "low"
+            },
+            "medium": {
+              "include": [
+                "reasoning.encrypted_content"
+              ],
+              "reasoningEffort": "medium",
+              "reasoningSummary": "auto",
+              "textVerbosity": "low"
+            }
+          }
+        },
+        "gpt-5.2-codex": {
+          "variants": {
+            "fast": {
+              "disabled": true
+            },
+            "high": {
+              "include": [
+                "reasoning.encrypted_content"
+              ],
+              "reasoningEffort": "high",
+              "reasoningSummary": "auto",
+              "textVerbosity": "low"
+            },
+            "medium": {
+              "include": [
+                "reasoning.encrypted_content"
+              ],
+              "reasoningEffort": "medium",
+              "reasoningSummary": "auto",
+              "textVerbosity": "low"
+            }
+          }
+        }
+      }
+    },
+    "opencode": {
+      "models": {
+        "big-pickle": {
+          "options": {
+            "reasoningEffort": "high",
+            "temperature": 1,
+            "top_k": 40,
+            "top_p": 0.95
+          },
+          "reasoning": true
+        }
+      }
+    },
+    "proxypal": {
+      "models": {
+        "gemini-2.5-computer-use-preview-10-2025": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 2 5 Computer Use Preview 10 2025",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-flash": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 2 5 Flash",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-flash-lite": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 2 5 Flash Lite",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-pro": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 2 5 Pro",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3-flash-preview": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 3 Flash Preview",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "medium": {
+              "thinkingLevel": "medium"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
+          },
+          "reasoning": true
+        },
+        "gemini-3-pro-image-preview": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 3 Pro Image Preview",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3-pro-preview": {
+          "limit": {
+            "context": 880964,
+            "output": 65536
+          },
+          "name": "Gemini 3 Pro Preview",
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
+          },
+          "reasoning": true
+        },
+        "gemini-claude-opus-4-5-thinking": {
+          "limit": {
+            "context": 168000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "name": "Gemini Claude Opus 4 5 Thinking",
+          "variants": {
+            "low": {
+              "thinkingConfig": {
+                "thinkingBudget": 8192
+              }
+            },
+            "max": {
+              "thinkingConfig": {
+                "thinkingBudget": 32768
+              }
+            }
+          },
+          "reasoning": true
+        },
+        "gemini-claude-sonnet-4-5": {
+          "limit": {
+            "context": 168000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "name": "Gemini Claude Sonnet 4 5"
+        },
+        "gemini-claude-sonnet-4-5-thinking": {
+          "limit": {
+            "context": 168000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "name": "Gemini Claude Sonnet 4 5 Thinking",
+          "variants": {
+            "low": {
+              "thinkingConfig": {
+                "thinkingBudget": 8192
+              }
+            },
+            "max": {
+              "thinkingConfig": {
+                "thinkingBudget": 32768
+              }
+            }
+          },
+          "reasoning": true
+        },
+        "glm-4.5": {
+          "limit": {
+            "context": 107520,
+            "output": 16384
+          },
+          "name": "Glm 4 5"
+        },
+        "glm-4.5-air": {
+          "limit": {
+            "context": 107520,
+            "output": 16384
+          },
+          "name": "Glm 4 5 Air"
+        },
+        "glm-4.6": {
+          "limit": {
+            "context": 107520,
+            "output": 16384
+          },
+          "name": "Glm 4 6"
+        },
+        "glm-4.7": {
+          "limit": {
+            "context": 107520,
+            "output": 16384
+          },
+          "name": "Glm 4 7"
+        },
+        "gpt-5": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5-codex": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 Codex",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5-codex-mini": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 Codex Mini",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.1": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 1",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.1-codex": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 1 Codex",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.1-codex-max": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 1 Codex Max",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.1-codex-mini": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 1 Codex Mini",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.2": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 2",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-5.2-codex": {
+          "limit": {
+            "context": 336000,
+            "output": 32768
+          },
+          "name": "Gpt 5 2 Codex",
+          "options": {
+            "reasoningEffort": "medium"
+          },
+          "reasoning": true
+        },
+        "gpt-oss-120b-medium": {
+          "limit": {
+            "context": 107520,
+            "output": 16384
+          },
+          "name": "Gpt Oss 120b Medium"
+        }
+      },
+      "name": "ProxyPal",
+      "npm": "@ai-sdk/anthropic",
+      "options": {
+        "apiKey": "proxypal-local",
+        "baseURL": "http://127.0.0.1:8317/v1",
+        "includeUsage": true
+      }
+    },
+    "zai-coding-plan": {
+      "models": {
+        "glm-4.6": {
+          "limit": {
+            "context": 128000,
+            "output": 16384
+          },
+          "options": {
+            "temperature": 1,
+            "thinking": {
+              "type": "enabled"
+            }
+          },
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true
+        },
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "interleaved": true,
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          },
+          "name": "GLM-4.7",
+          "options": {
+            "temperature": 1,
+            "thinking": {
+              "type": "enabled"
+            }
+          },
+          "reasoning": true
+        }
+      },
+      "name": "Z.AI Coding Plan"
+    }
+  },
+  "share": "manual",
+  "small_model": "opencode/gpt-5-nano",
+  "tui": {
+    "diff_style": "auto",
+    "scroll_acceleration": {
+      "enabled": true
+    },
+    "scroll_speed": 3
+  },
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "*.log",
+      ".DS_Store"
+    ]
+  }
+}

@@ -22,6 +22,7 @@
         .gradient-text {
             background: linear-gradient(135deg, #2563eb, #9333ea);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -227,6 +228,17 @@
         </div>
     </footer>
 
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.getMe();
+            if (!user) {
+                // For demo purposes, we might allow viewing, but for production readiness we redirect
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+    </script>
     <script>
         // Drag and Drop Functionality
         document.addEventListener('DOMContentLoaded', function () {

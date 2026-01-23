@@ -2,9 +2,10 @@
 FROM python:3.11-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV PORT 8080
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+ENV PYTHONPATH=/app
 
 # Set work directory
 WORKDIR /app
@@ -20,13 +21,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend code
-COPY . .
+# Copy the backend code into a subdirectory named 'backend'
+# to match the import structure 'from backend.xxx import ...'
+COPY . /app/backend/
 
 # Expose the port
 EXPOSE 8080
 
 # Command to run the application
-# Note: we use /app as the set working directory, and backend is the module
-# So we run from the root of the backend folder
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT}"]
+# We use 'backend.server:app' because server.py is inside /app/backend/
+CMD ["sh", "-c", "uvicorn backend.server:app --host 0.0.0.0 --port ${PORT}"]

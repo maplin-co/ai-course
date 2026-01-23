@@ -161,20 +161,34 @@
         </div>
     </div>
 
+    <script src="js/auth.js"></script>
     <script>
-        document.getElementById('signup-form').addEventListener('submit', function (e) {
+        document.getElementById('signup-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
+            const fullName = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            // In production, send to backend API
-            console.log('Sign up:', { name, email, password });
+            // Button loading state
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Creating account...';
+            submitBtn.disabled = true;
 
-            // For now, redirect to checkout
-            alert('Account created successfully! Redirecting to choose your plan...');
-            window.location.href = 'checkout.html';
+            try {
+                await auth.signup(fullName, email, password);
+
+                // Automatically login after signup
+                await auth.login(email, password);
+
+                alert('Account created successfully! Redirecting to choose your plan...');
+                window.location.href = 'checkout.html';
+            } catch (err) {
+                alert('Error: ' + err.message);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
         });
     </script>
 

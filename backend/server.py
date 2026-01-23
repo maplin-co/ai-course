@@ -1,9 +1,12 @@
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 import logging
+import os
 from fastapi.staticfiles import StaticFiles
 from backend.database import close_mongo_connection
-from backend.routers import auth, resources, payments
+from backend.sql_database import engine, Base
+import backend.sql_models  # Ensure models are registered
+from backend.routers import auth, resources, payments, courses
 
 # App init
 app = FastAPI()
@@ -30,6 +33,7 @@ api_router.include_router(resources.router, prefix="/resources", tags=["resource
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 
 app.include_router(api_router)
+app.include_router(courses.router)  # Courses router has its own /api/courses prefix
 
 # Mount static files (at the end so API takes precedence)
 static_path = os.path.join(os.path.dirname(__file__), "static")
@@ -40,6 +44,11 @@ elif os.path.exists("static"):
 
 
 # Events
+@app.on_event("startup")
+async def startup_event():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await close_mongo_connection()

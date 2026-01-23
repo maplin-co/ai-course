@@ -131,32 +131,35 @@
         </div>
     </div>
 
+    <script src="js/auth.js"></script>
     <script>
-        document.getElementById('login-form').addEventListener('submit', function (e) {
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
 
-            // In production, send to backend API
-            console.log('Login:', { email, password, remember });
+            // Button loading state
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Signing in...';
+            submitBtn.disabled = true;
 
-            // For now, simulate successful login and redirect to dashboard
-            // In production, this would:
-            // 1. POST to /api/auth/login
-            // 2. Receive JWT token
-            // 3. Store token in localStorage/cookie
-            // 4. Redirect to dashboard
+            try {
+                await auth.login(email, password);
 
-            alert('Login successful! Redirecting to your dashboard...');
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert('Login Error: ' + err.message);
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         document.getElementById('forgot-password').addEventListener('click', function (e) {
             e.preventDefault();
-            alert('Password reset functionality coming soon!\n\nIn production, this would:\n1. Ask for your email\n2. Send a reset link\n3. Allow you to create a new password');
+            alert('Password reset functionality coming soon!\n\nIn production, this would send a reset link to your email.');
         });
     </script>
 

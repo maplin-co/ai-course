@@ -1,0 +1,72 @@
+{
+  "$schema": "https://unpkg.com/@anthropic/dynamic-context-protocol@1.2.7/schema.json",
+  "enabled": true,
+  "debug": false,
+  // "minimal" shows prune activity without noise; "detailed" shows token counts
+  "pruneNotification": "off",
+  "turnProtection": {
+    "enabled": true,
+    // 3 turns = faster cleanup while still protecting recent context
+    "turns": 3,
+  },
+  // Protected file patterns - never auto-prune reads of these files (v1.1.5+)
+  "protectedFilePatterns": [
+    "**/.env*",
+    "**/AGENTS.md",
+    "**/.opencode/**",
+    "**/.beads/**",
+    "**/package.json",
+    "**/tsconfig.json",
+    "**/biome.json",
+  ],
+  "tools": {
+    "settings": {
+      "nudgeEnabled": true,
+      // Nudge every 8 tool calls (slightly more aggressive than default 10)
+      "nudgeFrequency": 8,
+      // Protect state-modifying and critical workflow tools
+      "protectedTools": [
+        "write",
+        "edit",
+        "memory-update",
+        "skill",
+        "skill_mcp",
+        "task",
+        "batch",
+        "todowrite",
+        "todoread",
+        "lsp",
+        "lsp_lsp_rename",
+        "lsp_lsp_find_references",
+        "lsp_lsp_goto_definition",
+        "lsp_lsp_code_actions",
+        "lsp_lsp_code_action_apply",
+        "lsp_lsp_organize_imports",
+      ],
+    },
+    "discard": {
+      "enabled": true,
+    },
+    "extract": {
+      "enabled": true,
+      "showDistillation": false,
+    },
+  },
+  "strategies": {
+    // Dedup = zero LLM cost, high impact - always enable
+    "deduplication": {
+      "enabled": true,
+      "protectedTools": [],
+    },
+    // Supersede writes = zero cost, removes redundant write inputs after read
+    "supersedeWrites": {
+      "enabled": true,
+    },
+    // Purge error inputs after 3 turns
+    "purgeErrors": {
+      "enabled": true,
+      "turns": 3,
+      "protectedTools": [],
+    },
+  },
+}

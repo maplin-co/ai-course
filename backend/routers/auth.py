@@ -3,6 +3,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from backend.database import db
 from backend.models import UserCreate, User, Token
 from backend.security import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.deps import get_current_user
+from backend.services.email import email_service
 from datetime import timedelta
 import logging
 
@@ -38,6 +40,18 @@ async def signup(user: UserCreate):
     
     await db.users.insert_one(user_doc)
     
+    # Send welcome email (non-blocking in a real app would use background tasks)
+    await email_service.send_email(
+        to_emails=[user.email],
+        subject="Welcome to LearnFlow! 🚀",
+        html_content=f"""
+            <h1>Welcome, {user.full_name or 'there'}!</h1>
+            <p>We're excited to have you on board. Your 7-day free trial has started.</p>
+            <p>Get started by building your first course with FlowAI.</p>
+            <a href="https://learnflow.ai/dashboard">Go to Dashboard</a>
+        """
+    )
+    
     return new_user
 
 @router.post("/token", response_model=Token)
@@ -62,3 +76,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": user_dict["email"]}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
