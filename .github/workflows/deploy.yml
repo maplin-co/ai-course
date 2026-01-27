@@ -32,7 +32,7 @@ jobs:
             - name: 📂 Sync files to Hostinger
               uses: SamKirkland/FTP-Deploy-Action@v4.3.5
               with:
-                  server: 46.202.180.226
+                  server: pohei.de
                   username: u723774100.pohei.de
                   password: ${{ secrets.FTP_PASSWORD }}
                   local-dir: ./frontend/build/
