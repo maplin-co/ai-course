@@ -12,7 +12,8 @@ const AIResources = () => {
             title: "AI Course Outline Generator",
             description: "Generate a comprehensive course structure from just a topic title. Our AI analyzes market demand and educational best practices.",
             icon: <Layout className="w-8 h-8 text-blue-600" />,
-            tag: "Course Creation"
+            tag: "Course Creation",
+            link: "/course-builder"
         },
         {
             title: "AI Content & Quiz Engine",
@@ -113,18 +114,20 @@ const AIResources = () => {
             <section className="py-24 px-6 max-w-7xl mx-auto">
                 <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
                     {aiTools.map((tool, index) => (
-                        <Card key={index} className="border-none shadow-xl shadow-gray-200/50 hover:translate-y-[-4px] transition-transform duration-300 rounded-3xl overflow-hidden">
-                            <CardHeader className="p-6 pb-0">
-                                <div className="mb-4">{tool.icon}</div>
-                                <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">{tool.tag}</div>
-                                <CardTitle className="text-lg font-bold mb-1">{tool.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-6 pt-2">
-                                <CardDescription className="text-gray-600 text-sm leading-relaxed">
-                                    {tool.description}
-                                </CardDescription>
-                            </CardContent>
-                        </Card>
+                        <Link key={index} to={tool.link || "#"}>
+                            <Card className="border-none shadow-xl shadow-gray-200/50 hover:translate-y-[-4px] transition-transform duration-300 rounded-3xl overflow-hidden h-full">
+                                <CardHeader className="p-6 pb-0">
+                                    <div className="mb-4">{tool.icon}</div>
+                                    <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">{tool.tag}</div>
+                                    <CardTitle className="text-lg font-bold mb-1">{tool.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6 pt-2">
+                                    <CardDescription className="text-gray-600 text-sm leading-relaxed">
+                                        {tool.description}
+                                    </CardDescription>
+                                </CardContent>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
             </section>

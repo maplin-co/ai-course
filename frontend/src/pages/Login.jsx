@@ -6,8 +6,10 @@ const Login = () => {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        // Since we don't have a real backend connected yet, we'll simulate a successful login
-        navigate('/dashboard');
+        // Simulate login and set a flag
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', e.target[0].value);
+        navigate('/ai-resources');
     };
 
     return (

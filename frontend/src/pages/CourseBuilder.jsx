@@ -56,7 +56,7 @@ const SidebarItem = ({ type, icon, label }) => {
 };
 
 // Sortable Module Item Component
-const SortableModule = ({ id, module, onDelete, onRemoveContent }) => {
+const SortableModule = ({ id, module, onDelete, onRemoveContent, onUpdateModule, onUpdateContent }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: module.id,
         data: {
@@ -78,12 +78,17 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent }) => {
             className={`p-5 bg-white rounded-2xl shadow-sm border ${isDragging ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-100 hover:border-blue-500'} transition-all group mb-4`}
         >
             <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center">
+                <div className="flex items-center flex-1">
                     <button {...attributes} {...listeners} className="mr-3 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
                         <GripVertical size={20} />
                     </button>
-                    <span className="text-blue-600 font-bold mr-3">{module.id}</span>
-                    <h4 className="font-bold text-lg">{module.title}</h4>
+                    <input
+                        type="text"
+                        value={module.title}
+                        onChange={(e) => onUpdateModule(module.id, e.target.value)}
+                        className="font-bold text-lg bg-transparent border-b border-transparent hover:border-gray-200 focus:border-blue-500 outline-none w-full mr-4"
+                        placeholder="Module Title"
+                    />
                 </div>
                 <button onClick={() => onDelete(id)} className="text-gray-300 hover:text-red-500 transition-colors">
                     <Trash2 size={18} />
@@ -99,13 +104,19 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent }) => {
                 )}
                 {module.content.map((item, idx) => (
                     <div key={idx} className="p-3 bg-gray-50 rounded-lg text-sm flex items-center justify-between group/item">
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-1">
                             <span className="mr-3">{item.icon}</span>
-                            {item.text}
+                            <input
+                                type="text"
+                                value={item.text}
+                                onChange={(e) => onUpdateContent(module.id, idx, e.target.value)}
+                                className="bg-transparent border-b border-transparent hover:border-gray-200 focus:border-blue-500 outline-none w-full"
+                                placeholder="Topic Content"
+                            />
                         </div>
                         <button
                             onClick={() => onRemoveContent(module.id, idx)}
-                            className="text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-all"
+                            className="text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-all ml-2"
                         >
                             <X size={14} />
                         </button>
@@ -122,27 +133,18 @@ const CourseBuilder = () => {
     const navigate = useNavigate();
 
     // Course Metadata State
-    const [courseTitle, setCourseTitle] = useState("Introduction to Modern Architecture");
-    const [courseDescription, setCourseDescription] = useState("Drag, drop, and automate your curriculum creation with AI.");
+    const [courseTitle, setCourseTitle] = useState("New Course Title");
+    const [courseDescription, setCourseDescription] = useState("Enter course description here...");
 
     // Modules State
-    const [modules, setModules] = useState([
-        {
-            id: '1.0',
-            title: "Introduction to Modern Architecture",
-            content: [
-                { type: 'video', text: "The History of Skyscraper Design (12:45)", icon: '📽️' },
-                { type: 'text', text: "Module Summary & Reading List", icon: '📄' }
-            ]
-        },
-        {
-            id: '2.0',
-            title: "Structural Foundations and Materials",
-            content: [
-                { type: 'text', text: "Understanding Concrete & Steel", icon: '📄' }
-            ]
+    const [modules, setModules] = useState([]);
+
+    useEffect(() => {
+        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (!loggedIn) {
+            navigate('/login');
         }
-    ]);
+    }, [navigate]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -225,9 +227,24 @@ const CourseBuilder = () => {
         const newId = `module-${Date.now()}`;
         setModules([...modules, {
             id: newId,
-            title: "New Untitled Module",
+            title: "",
             content: []
         }]);
+    };
+
+    const handleUpdateModule = (moduleId, newTitle) => {
+        setModules(prev => prev.map(m => m.id === moduleId ? { ...m, title: newTitle } : m));
+    };
+
+    const handleUpdateContent = (moduleId, contentIndex, newText) => {
+        setModules(prev => prev.map(m => {
+            if (m.id === moduleId) {
+                const newContent = [...m.content];
+                newContent[contentIndex] = { ...newContent[contentIndex], text: newText };
+                return { ...m, content: newContent };
+            }
+            return m;
+        }));
     };
 
     const handleSaveCourse = async () => {
@@ -319,6 +336,8 @@ const CourseBuilder = () => {
                                             module={module}
                                             onDelete={handleDeleteModule}
                                             onRemoveContent={handleRemoveContent}
+                                            onUpdateModule={handleUpdateModule}
+                                            onUpdateContent={handleUpdateContent}
                                         />
                                     ))}
                                 </SortableContext>
@@ -335,27 +354,31 @@ const CourseBuilder = () => {
                                 {/* AI Insertion Point */}
                                 <div
                                     onClick={() => {
+                                        if (!courseTitle || courseTitle === "New Course Title") {
+                                            alert("Please enter a course topic first!");
+                                            return;
+                                        }
+
                                         const templates = [
-                                            { type: 'video', title: 'Modern Design Principles', icon: '📽️' },
-                                            { type: 'text', title: 'User Experience Mastery', icon: '📄' },
-                                            { type: 'quiz', title: 'Knowledge Assessment', icon: '❓' }
+                                            { type: 'video', title: `Introduction to ${courseTitle}`, icon: '📽️' },
+                                            { type: 'text', title: `${courseTitle} Fundamentals`, icon: '📄' },
+                                            { type: 'quiz', title: `Mastering ${courseTitle} - Level 1`, icon: '❓' }
                                         ];
 
                                         const newModules = templates.map((tpl, index) => ({
                                             id: `gen-${Date.now()}-${index}`,
                                             title: tpl.title,
-                                            content: [{ type: tpl.type, text: `AI Generated ${tpl.type} content`, icon: tpl.icon }]
+                                            content: [{ type: tpl.type, text: `Key concepts of ${courseTitle} explained.`, icon: tpl.icon }]
                                         }));
 
                                         setModules(prev => [...prev, ...newModules]);
-                                        alert('FlowAI has generated 3 new modules based on your course topic!');
                                     }}
                                     className="mt-6 py-8 text-center border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/30 cursor-pointer hover:bg-blue-50 transition-colors"
                                 >
                                     <div className="inline-flex items-center text-blue-600 font-bold">
-                                        <span className="mr-2">✨</span> Generate next 3 modules with FlowAI
+                                        <span className="mr-2">✨</span> Generate next 3 modules for "{courseTitle}"
                                     </div>
-                                    <p className="text-xs text-blue-400 mt-2">Personalized based on current course trajectory</p>
+                                    <p className="text-xs text-blue-400 mt-2">Personalized based on your course topic</p>
                                 </div>
                             </div>
                         </section>

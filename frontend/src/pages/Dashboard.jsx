@@ -16,18 +16,25 @@ const Dashboard = () => {
     ];
 
     const [courses, setCourses] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
+        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (!loggedIn) {
+            navigate('/login');
+            return;
+        }
+
         const fetchCourses = async () => {
             try {
                 const response = await axios.get(`${API_BASE}/api/courses/`);
-                // Map backend data to match frontend display expectations (adding mock stats for now)
+                // Use actual data from backend
                 const mappedCourses = response.data.map((course, index) => ({
                     id: course.id,
                     title: course.title,
-                    students: Math.floor(Math.random() * 1000) + 100, // Mock student count
-                    progress: Math.floor(Math.random() * 100), // Mock progress
-                    image: `https://images.unsplash.com/photo-${index % 2 === 0 ? '1633356122544-f134324a6cee' : '1677442136019-21780ecad995'}?w=400`, // Cycle images
+                    students: 0, // Mock stats for students since backend doesn't track it yet
+                    progress: 0, // Mock stats for progress
+                    image: course.image || `https://images.unsplash.com/photo-${index % 2 === 0 ? '1633356122544-f134324a6cee' : '1677442136019-21780ecad995'}?w=400`,
                     description: course.description
                 }));
                 setCourses(mappedCourses);

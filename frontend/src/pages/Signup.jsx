@@ -6,8 +6,10 @@ const Signup = () => {
 
     const handleSignup = (e) => {
         e.preventDefault();
-        // Since we don't have a real backend connected yet, we'll simulate a successful signup
-        navigate('/dashboard');
+        // Simulate signup and set a flag
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userName', e.target[1].value); // Assuming index 1 is name based on form order
+        navigate('/ai-resources');
     };
     return (
         <div className="bg-gray-50 flex min-h-screen">
