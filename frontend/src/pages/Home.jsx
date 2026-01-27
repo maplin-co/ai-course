@@ -1,4 +1,5 @@
 import React from 'react';
+/* Deployment Verification: 2026-01-27 21:05 */
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
