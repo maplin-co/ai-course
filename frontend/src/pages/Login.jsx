@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = (e) => {
         e.preventDefault();
-        // Simulate login and set a flag
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', e.target[0].value);
-        navigate('/ai-resources');
+
+        // Get registered users from localStorage
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+
+        // Find user
+        const user = registeredUsers.find(u => u.email === email && u.password === password);
+
+        if (user) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userName', user.name);
+            navigate('/dashboard');
+        } else {
+            setError('Invalid email or password. Please sign up first if you haven\'t.');
+        }
     };
 
     return (
@@ -57,10 +71,17 @@ const Login = () => {
                     <p className="text-gray-500 mb-10">Enter your credentials to access your dashboard.</p>
 
                     <form className="space-y-6" onSubmit={handleLogin}>
+                        {error && (
+                            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 italic">
+                                {error}
+                            </div>
+                        )}
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email
                                 Address</label>
                             <input type="email" required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="john@company.com" />
                         </div>
@@ -70,6 +91,8 @@ const Login = () => {
                                 <Link to="#" className="text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:underline">Forgot?</Link>
                             </div>
                             <input type="password" required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="Enter your password" />
                         </div>

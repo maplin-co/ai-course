@@ -2,15 +2,38 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     const handleSignup = (e) => {
         e.preventDefault();
-        // Simulate signup and set a flag
+
+        // Get existing users
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+
+        // Check if user already exists
+        if (registeredUsers.some(u => u.email === email)) {
+            alert('User with this email already exists. Please sign in.');
+            navigate('/login');
+            return;
+        }
+
+        // Add new user
+        const newUser = { name, email, password };
+        registeredUsers.push(newUser);
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+        // Auto login
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userName', e.target[1].value); // Assuming index 1 is name based on form order
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', email);
+
+        alert('Account created successfully!');
         navigate('/ai-resources');
     };
+
     return (
         <div className="bg-gray-50 flex min-h-screen">
             {/* Left side: Value Prop */}
@@ -111,6 +134,8 @@ const Signup = () => {
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full
                                 Name</label>
                             <input type="text" required
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="John Doe" />
                         </div>
@@ -118,12 +143,16 @@ const Signup = () => {
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email
                                 Address</label>
                             <input type="email" required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="john@company.com" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
                             <input type="password" required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="Minimum 8 characters" />
                         </div>
