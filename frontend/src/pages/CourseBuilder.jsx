@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import {
@@ -115,6 +117,7 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent }) => {
 const CourseBuilder = () => {
     const [activeId, setActiveId] = useState(null);
     const [activeItem, setActiveItem] = useState(null);
+    const navigate = useNavigate();
 
     // Course Metadata State
     const [courseTitle, setCourseTitle] = useState("Introduction to Modern Architecture");
@@ -225,14 +228,22 @@ const CourseBuilder = () => {
         }]);
     };
 
-    const handleSaveCourse = () => {
-        const courseData = {
-            title: courseTitle,
-            description: courseDescription,
-            modules: modules
-        };
-        console.log("Saving Course Data:", courseData);
-        alert("Course Structure Saved! (Check Console for Data)");
+    const handleSaveCourse = async () => {
+        try {
+            const courseData = {
+                title: courseTitle,
+                description: courseDescription,
+                modules: modules
+            };
+            
+            const response = await axios.post('http://localhost:8000/api/courses/', courseData);
+            console.log("Course saved:", response.data);
+            alert("Course Saved Successfully!");
+            navigate('/dashboard'); // Redirect to dashboard
+        } catch (error) {
+            console.error("Error saving course:", error);
+            alert("Failed to save course. Please try again.");
+        }
     };
 
     return (

@@ -12,7 +12,7 @@ Docker Compose is **not supported** by Hostinger. Hostinger is a shared hosting 
 
 Deploy your application using a **split architecture**:
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │                                                 │
 │  Frontend (React) → Hostinger                   │
@@ -28,7 +28,7 @@ Deploy your application using a **split architecture**:
 
 ### 1️⃣ Deploy Database (5 minutes)
 
-**Option: Neon (Recommended)**
+#### Option: Neon (Recommended)
 
 1. Go to [neon.tech](https://neon.tech)
 2. Sign up → Create project → Create database `learnflow`
@@ -37,7 +37,7 @@ Deploy your application using a **split architecture**:
 
 ### 2️⃣ Deploy Backend (10 minutes)
 
-**Option: Railway (Recommended)**
+#### Option: Railway (Recommended)
 
 ```bash
 # Install Railway CLI
@@ -91,7 +91,7 @@ This will:
 
 ### 4️⃣ Upload to Hostinger (10 minutes)
 
-**Method 1: File Manager (Easiest)**
+#### Method 1: File Manager (Easiest)
 
 1. Log in to Hostinger control panel
 2. Go to **File Manager**
@@ -100,7 +100,7 @@ This will:
 5. Upload **ALL** files from `frontend/build/` folder
 6. Make sure `.htaccess` is uploaded too
 
-**Method 2: FTP**
+#### Method 2: FTP
 
 1. Get FTP credentials from Hostinger
 2. Use FileZilla or WinSCP
@@ -133,7 +133,7 @@ allow_origins=[
 ]
 ```
 
-2. Redeploy backend: `railway up`
+1. Redeploy backend: `railway up`
 
 ### ❌ 404 Error on Page Refresh
 
@@ -171,7 +171,7 @@ allow_origins=[
 
 ### Backend (Railway Dashboard)
 
-```
+```env
 ✅ DATABASE_URL=postgresql://...
 ✅ POSTGRES_USER=your_user
 ✅ POSTGRES_PASSWORD=your_password
@@ -184,7 +184,7 @@ allow_origins=[
 
 If you need to configure API URL, create `frontend/.env.production`:
 
-```
+```env
 REACT_APP_API_URL=https://your-backend.railway.app
 ```
 
@@ -195,7 +195,7 @@ Then rebuild: `npm run build`
 ## Cost Breakdown (Free Tier)
 
 | Service | Purpose | Free Tier |
-|---------|---------|-----------|
+| --- | --- | --- |
 | **Neon** | PostgreSQL | 10 GB storage |
 | **Railway** | Backend | $5 credit/month |
 | **Hostinger** | Frontend | Your existing plan |

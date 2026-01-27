@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
@@ -12,11 +13,29 @@ const Dashboard = () => {
         { label: 'Site Visits', value: '45.2K', grow: '+24%', icon: <Globe className="text-orange-600" /> },
     ];
 
-    const courses = [
-        { id: 1, title: 'Mastering React & Framer Motion', students: 450, progress: 85, image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400' },
-        { id: 2, title: 'AI-Driven Content Strategy 2026', students: 820, progress: 40, image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400' },
-        { id: 3, title: 'Modern UI/UX Design Systems', students: 310, progress: 95, image: 'https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?w=400' },
-    ];
+    const [courses, setCourses] = useState([]);
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/api/courses/');
+                // Map backend data to match frontend display expectations (adding mock stats for now)
+                const mappedCourses = response.data.map((course, index) => ({
+                    id: course.id,
+                    title: course.title,
+                    students: Math.floor(Math.random() * 1000) + 100, // Mock student count
+                    progress: Math.floor(Math.random() * 100), // Mock progress
+                    image: `https://images.unsplash.com/photo-${index % 2 === 0 ? '1633356122544-f134324a6cee' : '1677442136019-21780ecad995'}?w=400`, // Cycle images
+                    description: course.description
+                }));
+                setCourses(mappedCourses);
+            } catch (error) {
+                console.error("Error fetching courses:", error);
+            }
+        };
+
+        fetchCourses();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 pt-20">

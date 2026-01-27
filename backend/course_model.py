@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
-from backend.db_config import Base
+from backend.sql_database import Base
 
 
 class CourseModel(Base):

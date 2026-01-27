@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from backend.db_config import get_db
+from backend.sql_database import get_db
 from backend.schemas import Course, CourseCreate, CourseUpdate
 from backend import crud
 

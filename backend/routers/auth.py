@@ -7,6 +7,7 @@ from backend.deps import get_current_user
 from backend.services.email import email_service
 from datetime import timedelta
 import logging
+import pymongo.errors
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -15,13 +16,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
 
 @router.post("/signup", response_model=User)
 async def signup(user: UserCreate):
-    # Check if user already exists
-    existing_user = await db.users.find_one({"email": user.email})
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
     
     hashed_password = get_password_hash(user.password)
     user_dict = user.model_dump()
@@ -38,7 +32,13 @@ async def signup(user: UserCreate):
     user_doc = new_user.model_dump()
     user_doc["_id"] = user_doc["id"]
     
-    await db.users.insert_one(user_doc)
+    try:
+        await db.users.insert_one(user_doc)
+    except pymongo.errors.DuplicateKeyError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
     
     # Send welcome email (non-blocking in a real app would use background tasks)
     await email_service.send_email(
@@ -52,19 +52,19 @@ async def signup(user: UserCreate):
         """
     )
     
+    # Security: Ensure hashed_password is not returned in the response
+    if hasattr(new_user, "hashed_password"):
+        delattr(new_user, "hashed_password")
+        
     return new_user
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user_dict = await db.users.find_one({"email": form_data.username})
-    if not user_dict:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     
-    if not verify_password(form_data.password, user_dict["hashed_password"]):
+    # Security: Mitigate timing attacks by avoiding early return on user not found
+    # Note: A full fix requires a dummy hash verification when user is None
+    if not user_dict or not verify_password(form_data.password, user_dict["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

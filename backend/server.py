@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.database import close_mongo_connection
 from backend.sql_database import engine, Base
 import backend.sql_models  # Ensure models are registered
+import backend.course_model # Ensure course models are registered
 from backend.routers import auth, resources, payments, courses
 
 # App init
