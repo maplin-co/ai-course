@@ -1,0 +1,13 @@
+{
+    "name": "ai-course-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "cd frontend && npm install && npm run build",
+        "start": "cd backend && uvicorn server:app",
+        "dev": "concurrently \"cd frontend && npm start\" \"cd backend && uvicorn server:app --reload\""
+    },
+    "devDependencies": {
+        "concurrently": "^8.0.0"
+    }
+}
