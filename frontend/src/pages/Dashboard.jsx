@@ -123,8 +123,8 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-3 mt-4">
-                                            <Link to="/course-builder" className="flex-1 py-2 text-center bg-gray-50 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors">Edit Content</Link>
-                                            <Link to="#" className="flex-1 py-2 text-center bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors">View Analytics</Link>
+                                            <Link to={`/course/${course.id}`} className="flex-1 py-2 text-center bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">View Course</Link>
+                                            <Link to={`/course-builder/${course.id}`} className="flex-1 py-2 text-center bg-gray-50 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors">Edit Content</Link>
                                         </div>
                                     </div>
                                 </div>

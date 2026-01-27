@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import Success from "./pages/Success";
 import Dashboard from "./pages/Dashboard";
 import CourseBuilder from "./pages/CourseBuilder";
+import CourseViewer from "./pages/CourseViewer";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import ScrollToTop from "./components/ScrollToTop";
@@ -35,6 +36,8 @@ function App() {
           <Route path="/success" element={<Success />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/course-builder" element={<CourseBuilder />} />
+          <Route path="/course-builder/:id" element={<CourseBuilder />} />
+          <Route path="/course/:id" element={<CourseViewer />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Home />} />

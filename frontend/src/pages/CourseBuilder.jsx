@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -130,21 +130,31 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent, onUpdateModule,
 const CourseBuilder = () => {
     const [activeId, setActiveId] = useState(null);
     const [activeItem, setActiveItem] = useState(null);
-    const navigate = useNavigate();
-
-    // Course Metadata State
     const [courseTitle, setCourseTitle] = useState("New Course Title");
     const [courseDescription, setCourseDescription] = useState("Enter course description here...");
-
-    // Modules State
     const [modules, setModules] = useState([]);
+
+    const { id } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
         if (!loggedIn) {
             navigate('/login');
+            return;
         }
-    }, [navigate]);
+
+        // If editing an existing course
+        if (id) {
+            const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+            const courseToEdit = localCourses.find(c => c.id === id);
+            if (courseToEdit) {
+                setCourseTitle(courseToEdit.title);
+                setCourseDescription(courseToEdit.description);
+                setModules(courseToEdit.modules);
+            }
+        }
+    }, [id, navigate]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -250,11 +260,11 @@ const CourseBuilder = () => {
     const handleSaveCourse = async () => {
         try {
             const courseData = {
-                id: `course-${Date.now()}`,
+                id: id || `course-${Date.now()}`,
                 title: courseTitle,
                 description: courseDescription,
                 modules: modules,
-                createdAt: new Date().toISOString()
+                updatedAt: new Date().toISOString()
             };
 
             // 1. Try to save to API
@@ -264,12 +274,21 @@ const CourseBuilder = () => {
                 console.warn("API Save failed, falling back to LocalStorage only:", apiError);
             }
 
-            // 2. Always Save to LocalStorage for immediate dashboard visibility
-            const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
-            localCourses.unshift(courseData);
+            // 2. Save to LocalStorage
+            let localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+
+            if (id) {
+                // Update existing
+                localCourses = localCourses.map(c => c.id === id ? courseData : c);
+            } else {
+                // Add new
+                courseData.createdAt = new Date().toISOString();
+                localCourses.unshift(courseData);
+            }
+
             localStorage.setItem('createdCourses', JSON.stringify(localCourses));
 
-            alert("Course Saved Successfully!");
+            alert(id ? "Course Updated Successfully!" : "Course Saved Successfully!");
             navigate('/dashboard');
         } catch (error) {
             console.error("Error saving course:", error);
