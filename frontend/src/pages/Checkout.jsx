@@ -1,112 +1,160 @@
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
-import { Shield, CreditCard, Lock } from 'lucide-react';
+import { ShieldCheck, Lock, CreditCard, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
+import axios from 'axios';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 const Checkout = () => {
+    const location = useLocation();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleCheckout = (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setTimeout(() => {
-            navigate('/success');
-        }, 1500);
+    // In a real app, these would come from the previous page's state or cart
+    // const { course } = location.state || {};
+    const course = {
+        title: "Complete AI Art Mastery",
+        price: 49.99,
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80"
+    };
+
+    const handleDPOPayment = async () => {
+        setLoading(true);
+        try {
+            // 1. Create DPO Token
+            const response = await axios.post(`${API_BASE}/api/payments/dpo/create-token`, {
+                amount: course.price,
+                currency: "USD",
+                service_description: `Purchase: ${course.title}`,
+                customer_email: "student@example.com", // Should be form input
+                customer_first_name: "John",
+                customer_last_name: "Doe"
+            });
+
+            const { result, paymentUrl, transToken } = response.data;
+
+            if (result === "000") {
+                // 2. Redirect to DPO Payment Page
+                // In production: window.location.href = paymentUrl;
+
+                // For this demo since the URL is a mock, we'll simulate a "Success" flow
+                alert(`Redirecting to DPO Secure Payment...\nToken: ${transToken}`);
+
+                setTimeout(() => {
+                    navigate('/success');
+                }, 1500);
+
+            } else {
+                alert("Payment creation failed. Please try again.");
+            }
+        } catch (error) {
+            console.error("Payment Error:", error);
+            alert("Failed to initiate payment.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 pt-24 pb-12">
             <Header />
-            <main className="max-w-4xl mx-auto px-6">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-extrabold mb-4">Complete Your <span className="text-blue-600">Upgrade</span></h1>
-                    <p className="text-gray-500">Starting your 7-day free trial of LearnFlow Pro.</p>
+                    <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                        Secure Checkout
+                    </h1>
+                    <p className="mt-4 text-lg text-gray-500">
+                        Complete your purchase to verify your enrollment.
+                    </p>
                 </div>
 
-                <div className="grid md:grid-cols-5 gap-8">
-                    {/* Payment Form */}
-                    <div className="md:col-span-3">
-                        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                            <h2 className="text-xl font-bold mb-6 flex items-center">
-                                <CreditCard className="mr-3 text-blue-600" />
-                                Payment Method
-                            </h2>
-                            <form className="space-y-4" onSubmit={handleCheckout}>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Card Number</label>
-                                    <div className="relative">
-                                        <input type="text" placeholder="•••• •••• •••• ••••" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
-                                            <div className="w-6 h-4 bg-gray-200 rounded"></div>
-                                            <div className="w-6 h-4 bg-gray-300 rounded"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Expiry</label>
-                                        <input type="text" placeholder="MM/YY" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">CVC</label>
-                                        <input type="text" placeholder="•••" className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500" />
-                                    </div>
-                                </div>
-
-                                <div className="py-6 border-t border-gray-50 mt-8">
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading}
-                                        className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center"
-                                    >
-                                        {isLoading ? (
-                                            <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            "Start Free Trial"
-                                        )}
-                                    </button>
-                                </div>
-                                <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-                                    By clicking "Start Free Trial", you agree to our Terms of Service. You will not be charged until your trial ends. Cancel anytime.
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-
+                <div className="grid md:grid-cols-2 gap-12 items-start">
                     {/* Order Summary */}
-                    <div className="md:col-span-2 space-y-6">
-                        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                            <h2 className="text-xl font-bold mb-6">Plan Summary</h2>
-                            <div className="space-y-4 mb-6">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">LearnFlow Pro</span>
-                                    <span className="font-bold">$99/mo</span>
+                    <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
+                        <img
+                            src={course.image}
+                            alt={course.title}
+                            className="w-full h-48 object-cover"
+                        />
+                        <div className="p-8">
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Order Summary</h2>
+                            <div className="flex justify-between items-center py-4 border-b border-gray-100">
+                                <span className="text-gray-600">{course.title}</span>
+                                <span className="font-bold text-gray-900">${course.price}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-4 text-lg font-extrabold">
+                                <span>Total Due</span>
+                                <span className="text-blue-600">${course.price}</span>
+                            </div>
+
+                            <div className="mt-6 space-y-3">
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                                    <span>Instant Access to Course Content</span>
                                 </div>
-                                <div className="flex justify-between text-green-600">
-                                    <span>7-Day Trial</span>
-                                    <span className="font-bold">-$99.00</span>
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                                    <span>completion Certificate Included</span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                                    <span>30-Day Money-Back Guarantee</span>
                                 </div>
                             </div>
-                            <div className="pt-4 border-t border-gray-50 flex justify-between">
-                                <span className="font-bold">Due Today</span>
-                                <span className="text-2xl font-black text-gray-900">$0.00</span>
+                        </div>
+                    </div>
+
+                    {/* Payment Method */}
+                    <div className="space-y-8">
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                            <div className="flex items-center mb-6">
+                                <ShieldCheck className="text-green-600 mr-3" size={28} />
+                                <div>
+                                    <h3 className="font-bold text-gray-900">Secure Payment</h3>
+                                    <p className="text-xs text-gray-500">Encrypted 256-bit SSL transaction</p>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-6">
+                                <p className="text-sm text-blue-800 leading-relaxed">
+                                    We use <strong>DPO Pay</strong> (Direct Pay Online) for secure African and Global payments. You can pay via Credit Card or Mobile Money.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={handleDPOPayment}
+                                disabled={loading}
+                                className="w-full py-5 bg-[#2c3e50] text-white rounded-xl font-bold text-lg hover:bg-[#34495e] transition-all shadow-lg shadow-gray-400/20 active:scale-[0.98] flex items-center justify-center relative overflow-hidden"
+                            >
+                                {loading && (
+                                    <div className="absolute inset-0 bg-white/20 flex items-center justify-center">
+                                        <Loader2 className="animate-spin" />
+                                    </div>
+                                )}
+                                <span>Pay with DPO Secure</span>
+                                <ArrowRight className="ml-2" />
+                            </button>
+
+                            <div className="mt-6 flex justify-center space-x-4 opacity-50 grayscale hover:grayscale-0 transition-all">
+                                {/* Payment Logos Placeholder */}
+                                <div className="h-8 w-12 bg-gray-200 rounded"></div>
+                                <div className="h-8 w-12 bg-gray-200 rounded"></div>
+                                <div className="h-8 w-12 bg-gray-200 rounded"></div>
                             </div>
                         </div>
 
-                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                            <div className="flex items-center mb-4 text-blue-600">
-                                <Shield size={20} className="mr-2" />
-                                <span className="font-bold text-sm">Secure Checkout</span>
+                        <div className="text-center">
+                            <div className="inline-flex items-center text-gray-400 text-sm">
+                                <Lock size={14} className="mr-1" />
+                                <span>Payments processed securely by Direct Pay Online</span>
                             </div>
-                            <p className="text-xs text-blue-500 leading-relaxed">
-                                Your information encrypted with 256-bit SSL and processed securely via FlowCommerce.
-                            </p>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
             <Footer />
         </div>
     );

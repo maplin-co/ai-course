@@ -105,14 +105,63 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent, onUpdateModule,
                 {module.content.map((item, idx) => (
                     <div key={idx} className="p-3 bg-gray-50 rounded-lg text-sm flex items-center justify-between group/item">
                         <div className="flex items-center flex-1">
-                            <span className="mr-3">{item.icon}</span>
-                            <input
-                                type="text"
-                                value={item.text}
-                                onChange={(e) => onUpdateContent(module.id, idx, e.target.value)}
-                                className="bg-transparent border-b border-transparent hover:border-gray-200 focus:border-blue-500 outline-none w-full"
-                                placeholder="Topic Content"
-                            />
+                            <span className="mr-3 text-lg">{item.icon}</span>
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    value={item.text}
+                                    onChange={(e) => onUpdateContent(module.id, idx, e.target.value)}
+                                    className="bg-transparent border-b border-transparent hover:border-gray-200 focus:border-blue-500 outline-none w-full font-medium"
+                                    placeholder={item.type === 'video' ? "Video Title" : "Topic Content"}
+                                />
+                                {(item.type === 'video' || item.type === 'file') && (
+                                    <div className="mt-2">
+                                        {item.url ? (
+                                            <div className="text-xs text-green-600 flex items-center bg-green-50 w-fit px-2 py-1 rounded">
+                                                <span className="mr-1">✓</span> File Uploaded
+                                                <button
+                                                    className="ml-2 text-gray-400 hover:text-red-500"
+                                                    onClick={() => onUpdateContent(module.id, idx, "", "remove_url")}
+                                                >
+                                                    <X size={10} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <label className="cursor-pointer inline-flex items-center text-xs text-blue-500 hover:bg-blue-50 px-2 py-1 rounded transition-colors border border-dashed border-blue-200">
+                                                <span>Upload {item.type === 'video' ? 'Video' : 'File'}</span>
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept={item.type === 'video' ? "video/*" : ".pdf,.doc,.docx"}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            // In a real app, upload usage:
+                                                            const formData = new FormData();
+                                                            formData.append('file', file);
+
+                                                            // Optimistic update
+                                                            // onUpdateContent(module.id, idx, "Uploading...");
+
+                                                            axios.post(`${API_BASE}/api/media/upload`, formData, {
+                                                                headers: {
+                                                                    'Content-Type': 'multipart/form-data',
+                                                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                                                }
+                                                            }).then(res => {
+                                                                onUpdateContent(module.id, idx, res.data.url, "url");
+                                                            }).catch(err => {
+                                                                console.error("Upload failed", err);
+                                                                alert("Upload failed. Make sure you are logged in.");
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <button
                             onClick={() => onRemoveContent(module.id, idx)}
@@ -246,11 +295,19 @@ const CourseBuilder = () => {
         setModules(prev => prev.map(m => m.id === moduleId ? { ...m, title: newTitle } : m));
     };
 
-    const handleUpdateContent = (moduleId, contentIndex, newText) => {
+    const handleUpdateContent = (moduleId, contentIndex, newValue, field = "text") => {
         setModules(prev => prev.map(m => {
             if (m.id === moduleId) {
                 const newContent = [...m.content];
-                newContent[contentIndex] = { ...newContent[contentIndex], text: newText };
+                if (field === "text") {
+                    newContent[contentIndex] = { ...newContent[contentIndex], text: newValue };
+                } else if (field === "url") {
+                    newContent[contentIndex] = { ...newContent[contentIndex], url: newValue };
+                } else if (field === "remove_url") {
+                    const item = newContent[contentIndex];
+                    delete item.url;
+                    newContent[contentIndex] = { ...item };
+                }
                 return { ...m, content: newContent };
             }
             return m;

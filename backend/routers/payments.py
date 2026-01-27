@@ -43,6 +43,14 @@ class PaymentIntentRequest(BaseModel):
     currency: str = "usd"
     description: Optional[str] = None
 
+class DPOPaymentRequest(BaseModel):
+    amount: float
+    currency: str = "USD"
+    service_description: str
+    customer_email: EmailStr
+    customer_first_name: str
+    customer_last_name: str
+
 # Helper Functions
 def get_paypal_access_token():
     """Get PayPal OAuth access token"""
@@ -308,7 +316,51 @@ async def get_paypal_order_status(order_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ============= PAYOUT INFORMATION =============
+# ============= DPO (Direct Pay Online) ENDPOINTS =============
+
+@router.post("/dpo/create-token")
+async def create_dpo_token(request: DPOPaymentRequest):
+    """
+    Create a DPO Payment Token
+    """
+    try:
+        # In a real implementation, you would construct XML and POST to DPO API
+        # DPO_API_URL = "https://secure.3gdirectpay.com/API/v6/"
+        # xml_payload = f"..."
+        # response = requests.post(DPO_API_URL, data=xml_payload)
+        
+        # MOCK IMPLEMENTATION (Simulating success)
+        import uuid
+        mock_trans_token = f"DPO-{uuid.uuid4()}"
+        mock_trans_ref = f"REF-{uuid.uuid4()}"
+        
+        # In real DPO, you get a TransToken and a Reference
+        return {
+            "result": "000",
+            "resultExplanation": "Transaction Created",
+            "transToken": mock_trans_token,
+            "transRef": mock_trans_ref,
+            # For testing, we mock the payment page URL redirect
+            # In via real DPO: https://secure.3gdirectpay.com/payv2.php?ID={mock_trans_token}
+            "paymentUrl": f"https://secure.3gdirectpay.com/payv2.php?ID={mock_trans_token}"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DPO Token Creation Failed: {str(e)}")
+
+@router.get("/dpo/verify-token/{trans_token}")
+async def verify_dpo_token(trans_token: str):
+    """
+    Verify status of a DPO Transaction
+    """
+    # Simply mocking a success response for the demo
+    return {
+        "result": "000",
+        "resultExplanation": "Transaction Paid",
+        "customerName": "Test User",
+        "amount": "99.00",
+        "currency": "USD"
+    }
 
 @router.get("/payout-info")
 async def get_payout_information():
