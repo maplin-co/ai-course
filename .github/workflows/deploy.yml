@@ -1,3 +1,4 @@
+# Deploy to Hostinger - Triggered by password update
 name: Deploy to Hostinger
 
 on:
