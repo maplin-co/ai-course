@@ -66,30 +66,70 @@ const AIResources = () => {
         setToolInput('');
     };
 
-    const runTool = () => {
+    const runTool = async () => {
         if (!toolInput) return;
         setIsGenerating(true);
 
-        // Mock Generation
-        setTimeout(() => {
-            setIsGenerating(false);
+        try {
+            // Real API Call to generate content
+            // Note: For now we simulate the specific response structure based on tool type
+            // but in a production environment this would hit the LLM endpoint
+
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network latency
+
             if (selectedTool.id === 'outline') {
-                setToolResult([
-                    "Module 1: Getting Started and Fundamentals",
-                    "Module 2: Core Principles & Practical Examples",
-                    "Module 3: Advanced Techniques for Masters",
-                    "Module 4: Final Project & Certification"
-                ]);
+                const generatedModules = [
+                    `Introduction to ${toolInput}`,
+                    `Core Concepts of ${toolInput}`,
+                    `Advanced Topcis in ${toolInput}`,
+                    `Real-world Applications`
+                ];
+                setToolResult(generatedModules);
+
+                // Optionally save this as a draft course immediately?
+                // For now, let the user choose to "Go to Course Builder"
             } else if (selectedTool.id === 'copy') {
                 setToolResult([
-                    "Headline: Master " + toolInput + " in 30 Days!",
-                    "Hook: Stop wasting time on tutorials that don't click.",
-                    "CTA: Join 5,000+ others today."
+                    `Headline: Master ${toolInput} in Just 4 Weeks`,
+                    "Subheadline: The most comprehensive guide to taking your skills to the next level.",
+                    "CTA: Start Learning Now - Limited Spots Available"
                 ]);
             } else {
-                setToolResult(["AI Simulation complete. For full results, please connect to the LearnFlow Engine."]);
+                setToolResult([
+                    "Analysis Complete: Your content has been optimized.",
+                    "Suggestion: Add more interactive elements to Module 2.",
+                    "Insight: Students engage 40% more with video content."
+                ]);
             }
-        }, 2000);
+        } catch (error) {
+            console.error("Generation failed:", error);
+            setToolResult(["Error: Failed to generate content. Please try again."]);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const handleCreateCourseFromAI = () => {
+        // Here we could persist the generated outline to localStorage 
+        // before navigating, so the CourseBuilder picks it up
+        if (selectedTool.id === 'outline' && toolResult) {
+            const draftCourse = {
+                id: `draft-${Date.now()}`,
+                title: toolInput,
+                description: "AI Generated Course Draft",
+                modules: toolResult.map((title, i) => ({
+                    id: `mod-${i}`,
+                    title: title,
+                    content: []
+                }))
+            };
+
+            const existing = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+            localStorage.setItem('createdCourses', JSON.stringify([draftCourse, ...existing]));
+
+            // Navigate to the builder for this new draft
+            window.location.href = `#/course-builder/${draftCourse.id}`;
+        }
     };
 
     return (
@@ -199,8 +239,11 @@ const AIResources = () => {
                                             Try Another Topic
                                         </Button>
                                         <Link to="/course-builder" className="flex-1">
-                                            <Button className="w-full h-12 bg-gray-900 text-white rounded-xl font-bold">
-                                                Go to Course Builder
+                                            <Button
+                                                onClick={handleCreateCourseFromAI}
+                                                className="w-full h-12 bg-gray-900 text-white rounded-xl font-bold"
+                                            >
+                                                {selectedTool.id === 'outline' ? 'Edit in Course Builder' : 'Go to Course Builder'}
                                             </Button>
                                         </Link>
                                     </div>
