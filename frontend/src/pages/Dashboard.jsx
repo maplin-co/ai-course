@@ -5,6 +5,8 @@ import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import { BarChart3, BookOpen, Globe, Users, Plus, ArrowRight } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 const Dashboard = () => {
     const stats = [
         { label: 'Total Students', value: '1,284', grow: '+12%', icon: <Users className="text-blue-600" /> },
@@ -18,7 +20,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/courses/');
+                const response = await axios.get(`${API_BASE}/api/courses/`);
                 // Map backend data to match frontend display expectations (adding mock stats for now)
                 const mappedCourses = response.data.map((course, index) => ({
                     id: course.id,

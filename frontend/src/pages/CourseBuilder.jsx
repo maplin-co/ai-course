@@ -23,6 +23,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, X } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 // Sidebar Item Component (Draggable)
 const SidebarItem = ({ type, icon, label }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -235,8 +237,8 @@ const CourseBuilder = () => {
                 description: courseDescription,
                 modules: modules
             };
-            
-            const response = await axios.post('http://localhost:8000/api/courses/', courseData);
+
+            const response = await axios.post(`${API_BASE}/api/courses/`, courseData);
             console.log("Course saved:", response.data);
             alert("Course Saved Successfully!");
             navigate('/dashboard'); // Redirect to dashboard
