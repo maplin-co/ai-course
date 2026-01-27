@@ -37,3 +37,28 @@ class Course(CourseBase):
 
     class Config:
         from_attributes = True
+
+
+class EnrollmentBase(BaseModel):
+    user_id: str
+    course_id: int
+
+
+class EnrollmentCreate(EnrollmentBase):
+    pass
+
+
+class EnrollmentUpdate(BaseModel):
+    progress_data: Dict[str, Any]
+    is_completed: Optional[bool] = None
+
+
+class Enrollment(EnrollmentBase):
+    id: str
+    progress_data: Dict[str, Any] = {}
+    is_completed: bool
+    enrolled_at: datetime
+    last_accessed: datetime
+
+    class Config:
+        from_attributes = True
