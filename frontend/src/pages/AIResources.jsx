@@ -19,43 +19,50 @@ const AIResources = () => {
             title: "AI Content & Quiz Engine",
             description: "Convert your raw notes or videos into polished lesson content, interactive quizzes, and downloadable summaries automatically.",
             icon: <Wand2 className="w-8 h-8 text-purple-600" />,
-            tag: "Automation"
+            tag: "Automation",
+            link: "/course-builder"
         },
         {
             title: "Smart Student Support AI",
             description: "A 24/7 AI assistant that answers student questions based on your course content, reducing support tickets by up to 80%.",
             icon: <MessageSquare className="w-8 h-8 text-indigo-600" />,
-            tag: "Engagement"
+            tag: "Engagement",
+            link: "/course-builder"
         },
         {
             title: "FlowAI Marketing Copy",
             description: "Write high-converting sales pages, email sequences, and social media posts tailored to your specific audience in seconds.",
             icon: <Sparkles className="w-8 h-8 text-pink-600" />,
-            tag: "Sales"
+            tag: "Sales",
+            link: "/course-builder"
         },
         {
             title: "AI Video-to-Course",
             description: "Upload a video or provide a link, and our AI will extract chapters, write transcripts, and create study guides automatically.",
             icon: <Zap className="w-8 h-8 text-yellow-500" />,
-            tag: "Creation"
+            tag: "Creation",
+            link: "/course-builder"
         },
         {
             title: "1-Click AI Localization",
             description: "Instantly translate your course videos and text into 40+ languages while maintaining your original brand voice.",
             icon: <Globe className="w-8 h-8 text-green-600" />,
-            tag: "Global"
+            tag: "Global",
+            link: "/course-builder"
         },
         {
             title: "AI Student Coach",
             description: "Personalized learning paths that adapt in real-time based on student Performance and learning style.",
             icon: <Cpu className="w-8 h-8 text-indigo-500" />,
-            tag: "Experience"
+            tag: "Experience",
+            link: "/course-builder"
         },
         {
             title: "AI Sales Agent",
             description: "A virtual assistant for your landing pages that answers questions and closes deals while you sleep.",
             icon: <Users className="w-8 h-8 text-blue-500" />,
-            tag: "Growth"
+            tag: "Growth",
+            link: "/course-builder"
         }
     ];
 
@@ -103,7 +110,12 @@ const AIResources = () => {
                                 Try AI Tools Free
                             </Button>
                         </Link>
-                        <Button size="lg" variant="outline" className="border-gray-200 px-8 h-12 rounded-xl">
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="border-gray-200 px-8 h-12 rounded-xl"
+                            onClick={() => document.getElementById('ai-roadmap')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
                             View AI Roadmap
                         </Button>
                     </div>
@@ -161,7 +173,7 @@ const AIResources = () => {
                                     Smart Quiz Creation
                                 </li>
                             </ul>
-                            <Link to="/signup">
+                            <Link to="/course-builder">
                                 <Button className="h-14 px-10 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-gray-800">
                                     Launch Your First AI Course
                                 </Button>
@@ -212,7 +224,7 @@ const AIResources = () => {
             </section>
 
             {/* AI Roadmap Section */}
-            <section className="py-24 px-6 bg-gradient-to-br from-gray-900 to-blue-900 text-white rounded-3xl mx-6 my-12 overflow-hidden relative">
+            <section id="ai-roadmap" className="py-24 px-6 bg-gradient-to-br from-gray-900 to-blue-900 text-white rounded-3xl mx-6 my-12 overflow-hidden relative">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent"></div>
                 </div>

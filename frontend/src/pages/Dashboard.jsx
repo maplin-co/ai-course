@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BarChart3, BookOpen, Globe, Users, Plus, ArrowRight } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
@@ -29,7 +29,8 @@ const Dashboard = () => {
             try {
                 const response = await axios.get(`${API_BASE}/api/courses/`);
                 // Use actual data from backend
-                const mappedCourses = response.data.map((course, index) => ({
+                const data = Array.isArray(response.data) ? response.data : [];
+                const mappedCourses = data.map((course, index) => ({
                     id: course.id,
                     title: course.title,
                     students: 0, // Mock stats for students since backend doesn't track it yet
@@ -40,6 +41,7 @@ const Dashboard = () => {
                 setCourses(mappedCourses);
             } catch (error) {
                 console.error("Error fetching courses:", error);
+                setCourses([]); // Fallback to empty array
             }
         };
 
