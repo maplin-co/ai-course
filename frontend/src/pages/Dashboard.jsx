@@ -27,21 +27,32 @@ const Dashboard = () => {
 
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(`${API_BASE}/api/courses/`);
-                // Use actual data from backend
-                const data = Array.isArray(response.data) ? response.data : [];
-                const mappedCourses = data.map((course, index) => ({
-                    id: course.id,
+                let apiCourses = [];
+                try {
+                    const response = await axios.get(`${API_BASE}/api/courses/`);
+                    apiCourses = Array.isArray(response.data) ? response.data : [];
+                } catch (e) {
+                    console.warn("API Fetch failed, using LocalStorage only:", e);
+                }
+
+                // Get local courses
+                const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+
+                // Combine them (Local first for immediate feedback)
+                const allData = [...localCourses, ...apiCourses];
+
+                const mappedCourses = allData.map((course, index) => ({
+                    id: course.id || `course-${index}`,
                     title: course.title,
-                    students: 0, // Mock stats for students since backend doesn't track it yet
-                    progress: 0, // Mock stats for progress
+                    students: course.students || 0,
+                    progress: course.progress || 0,
                     image: course.image || `https://images.unsplash.com/photo-${index % 2 === 0 ? '1633356122544-f134324a6cee' : '1677442136019-21780ecad995'}?w=400`,
                     description: course.description
                 }));
                 setCourses(mappedCourses);
             } catch (error) {
                 console.error("Error fetching courses:", error);
-                setCourses([]); // Fallback to empty array
+                setCourses([]);
             }
         };
 

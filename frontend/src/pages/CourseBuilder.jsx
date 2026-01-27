@@ -250,19 +250,72 @@ const CourseBuilder = () => {
     const handleSaveCourse = async () => {
         try {
             const courseData = {
+                id: `course-${Date.now()}`,
                 title: courseTitle,
                 description: courseDescription,
-                modules: modules
+                modules: modules,
+                createdAt: new Date().toISOString()
             };
 
-            const response = await axios.post(`${API_BASE}/api/courses/`, courseData);
-            console.log("Course saved:", response.data);
+            // 1. Try to save to API
+            try {
+                await axios.post(`${API_BASE}/api/courses/`, courseData);
+            } catch (apiError) {
+                console.warn("API Save failed, falling back to LocalStorage only:", apiError);
+            }
+
+            // 2. Always Save to LocalStorage for immediate dashboard visibility
+            const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+            localCourses.unshift(courseData);
+            localStorage.setItem('createdCourses', JSON.stringify(localCourses));
+
             alert("Course Saved Successfully!");
-            navigate('/dashboard'); // Redirect to dashboard
+            navigate('/dashboard');
         } catch (error) {
             console.error("Error saving course:", error);
             alert("Failed to save course. Please try again.");
         }
+    };
+
+    const generateAIContent = () => {
+        if (!courseTitle || courseTitle === "New Course Title") {
+            alert("Please enter a course topic first!");
+            return;
+        }
+
+        const templates = [
+            {
+                title: `Introduction to ${courseTitle}`,
+                content: [
+                    { type: 'video', text: "Welcome & Course Overview", icon: '📽️' },
+                    { type: 'text', text: "Learning Objectives", icon: '📄' }
+                ]
+            },
+            {
+                title: `${courseTitle} Foundational Concepts`,
+                content: [
+                    { type: 'text', text: "Key Terminology & Theory", icon: '📄' },
+                    { type: 'video', text: "Core Principles Explained", icon: '📽️' },
+                    { type: 'quiz', text: "Quick Knowledge Check", icon: '❓' }
+                ]
+            },
+            {
+                title: `Advanced ${courseTitle} Techniques`,
+                content: [
+                    { type: 'video', text: "Step-by-Step Implementation", icon: '📽️' },
+                    { type: 'text', text: "Case Study & Best Practices", icon: '📄' },
+                    { type: 'file', text: "Reference Material (PDF)", icon: '📁' }
+                ]
+            }
+        ];
+
+        const newModules = templates.map((tpl, index) => ({
+            id: `gen-${Date.now()}-${index}`,
+            title: tpl.title,
+            content: tpl.content
+        }));
+
+        setModules(prev => [...prev, ...newModules]);
     };
 
     return (
@@ -310,7 +363,10 @@ const CourseBuilder = () => {
                                 <SidebarItem type="video" label="Video Player" icon="📽️" />
                                 <SidebarItem type="quiz" label="Interactive Quiz" icon="❓" />
                                 <SidebarItem type="file" label="Downloadable File" icon="📁" />
-                                <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center cursor-pointer hover:bg-white hover:shadow-sm transition-all text-blue-600">
+                                <div
+                                    onClick={generateAIContent}
+                                    className="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center cursor-pointer hover:bg-white hover:shadow-sm transition-all text-blue-600"
+                                >
                                     <span className="mr-3">✨</span>
                                     <span className="text-sm font-bold tracking-tight">AI Multi-Generator</span>
                                 </div>
@@ -353,26 +409,7 @@ const CourseBuilder = () => {
 
                                 {/* AI Insertion Point */}
                                 <div
-                                    onClick={() => {
-                                        if (!courseTitle || courseTitle === "New Course Title") {
-                                            alert("Please enter a course topic first!");
-                                            return;
-                                        }
-
-                                        const templates = [
-                                            { type: 'video', title: `Introduction to ${courseTitle}`, icon: '📽️' },
-                                            { type: 'text', title: `${courseTitle} Fundamentals`, icon: '📄' },
-                                            { type: 'quiz', title: `Mastering ${courseTitle} - Level 1`, icon: '❓' }
-                                        ];
-
-                                        const newModules = templates.map((tpl, index) => ({
-                                            id: `gen-${Date.now()}-${index}`,
-                                            title: tpl.title,
-                                            content: [{ type: tpl.type, text: `Key concepts of ${courseTitle} explained.`, icon: tpl.icon }]
-                                        }));
-
-                                        setModules(prev => [...prev, ...newModules]);
-                                    }}
+                                    onClick={generateAIContent}
                                     className="mt-6 py-8 text-center border-2 border-dashed border-blue-100 rounded-3xl bg-blue-50/30 cursor-pointer hover:bg-blue-50 transition-colors"
                                 >
                                     <div className="inline-flex items-center text-blue-600 font-bold">
