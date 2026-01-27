@@ -35,7 +35,8 @@ api_router.include_router(resources.router, prefix="/resources", tags=["resource
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 
 app.include_router(api_router)
-app.include_router(courses.router)  # Courses router has its own /api/courses prefix
+app.include_router(courses.router)
+app.include_router(backend.routers.enrollments.router)
 
 # Mount static files (at the end so API takes precedence)
 static_path = os.path.join(os.path.dirname(__file__), "static")
