@@ -37,6 +37,6 @@ jobs:
                   username: u723774100.pohei.de
                   password: ${{ secrets.FTP_PASSWORD }}
                   local-dir: ./frontend/build/
-                  server-dir: ./
+                  server-dir: public_html/
                   port: 21
                   protocol: ftp
