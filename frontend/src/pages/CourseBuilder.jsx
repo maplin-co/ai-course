@@ -21,7 +21,7 @@ import {
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, GripVertical, Plus, X } from 'lucide-react';
+import { Trash2, GripVertical, Plus, X, Loader2 } from 'lucide-react';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -182,6 +182,7 @@ const CourseBuilder = () => {
     const [courseTitle, setCourseTitle] = useState("New Course Title");
     const [courseDescription, setCourseDescription] = useState("Enter course description here...");
     const [modules, setModules] = useState([]);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -353,45 +354,35 @@ const CourseBuilder = () => {
         }
     };
 
-    const generateAIContent = () => {
+    const generateAIContent = async () => {
         if (!courseTitle || courseTitle === "New Course Title") {
             alert("Please enter a course topic first!");
             return;
         }
 
-        const templates = [
-            {
-                title: `Introduction to ${courseTitle}`,
-                content: [
-                    { type: 'video', text: "Welcome & Course Overview", icon: '📽️' },
-                    { type: 'text', text: "Learning Objectives", icon: '📄' }
-                ]
-            },
-            {
-                title: `${courseTitle} Foundational Concepts`,
-                content: [
-                    { type: 'text', text: "Key Terminology & Theory", icon: '📄' },
-                    { type: 'video', text: "Core Principles Explained", icon: '📽️' },
-                    { type: 'quiz', text: "Quick Knowledge Check", icon: '❓' }
-                ]
-            },
-            {
-                title: `Advanced ${courseTitle} Techniques`,
-                content: [
-                    { type: 'video', text: "Step-by-Step Implementation", icon: '📽️' },
-                    { type: 'text', text: "Case Study & Best Practices", icon: '📄' },
-                    { type: 'file', text: "Reference Material (PDF)", icon: '📁' }
-                ]
-            }
-        ];
+        setIsGenerating(true);
+        try {
+            const response = await axios.post(`${API_BASE}/api/ai/generate-course`, {
+                topic: courseTitle,
+                target_audience: "Beginner"
+            });
 
-        const newModules = templates.map((tpl, index) => ({
-            id: `gen-${Date.now()}-${index}`,
-            title: tpl.title,
-            content: tpl.content
-        }));
+            const generatedData = response.data;
 
-        setModules(prev => [...prev, ...newModules]);
+            // Map generated modules to ensure they have unique IDs for the builder
+            const newModules = generatedData.modules.map((m, index) => ({
+                id: `gen-${Date.now()}-${index}`,
+                title: m.title,
+                content: m.content || []
+            }));
+
+            setModules(prev => [...prev, ...newModules]);
+        } catch (error) {
+            console.error("AI Generation Failed:", error);
+            alert("Failed to generate content. Ensure backend is running and API Key is set.");
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     return (
@@ -439,13 +430,23 @@ const CourseBuilder = () => {
                                 <SidebarItem type="video" label="Video Player" icon="📽️" />
                                 <SidebarItem type="quiz" label="Interactive Quiz" icon="❓" />
                                 <SidebarItem type="file" label="Downloadable File" icon="📁" />
-                                <div
+                                <button
                                     onClick={generateAIContent}
-                                    className="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center cursor-pointer hover:bg-white hover:shadow-sm transition-all text-blue-600"
+                                    disabled={isGenerating}
+                                    className="w-full p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center cursor-pointer hover:bg-white hover:shadow-sm transition-all text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <span className="mr-3">✨</span>
-                                    <span className="text-sm font-bold tracking-tight">AI Multi-Generator</span>
-                                </div>
+                                    {isGenerating ? (
+                                        <>
+                                            <Loader2 size={18} className="animate-spin mr-3" />
+                                            <span className="text-sm font-bold tracking-tight">Generating...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="mr-3">✨</span>
+                                            <span className="text-sm font-bold tracking-tight">AI Multi-Generator</span>
+                                        </>
+                                    )}
+                                </button>
                             </div>
 
                             <div className="mt-12 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
