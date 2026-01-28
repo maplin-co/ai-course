@@ -344,6 +344,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 # CORS
 CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 
+# AI Provider
+OPENAI_API_KEY=sk_live_xxx
+
 # Optional: Stripe (if using payments)
 STRIPE_SECRET_KEY=sk_live_xxx
 STRIPE_PUBLISHABLE_KEY=pk_live_xxx

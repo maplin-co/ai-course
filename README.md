@@ -250,6 +250,9 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 STRIPE_SECRET_KEY=sk_test_your_key_here
 STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
+
+# AI Provider
+OPENAI_API_KEY=sk_your_openai_api_key_here
 ```
 
 ## 🚦 Testing

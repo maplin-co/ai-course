@@ -178,6 +178,7 @@ allow_origins=[
 ✅ POSTGRES_DB=learnflow
 ✅ SECRET_KEY=your_secret_key
 ✅ CORS_ORIGINS=https://yourdomain.com
+✅ OPENAI_API_KEY=sk_...
 ```
 
 ### Frontend (Build Time)

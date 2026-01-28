@@ -10,7 +10,8 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 logger = logging.getLogger(__name__)
 
 # Configure Gemini
-api_key = os.getenv("GEMINI_API_KEY")
+# Configure Gemini
+api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
 if api_key:
     genai.configure(api_key=api_key)
 
