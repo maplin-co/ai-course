@@ -39,7 +39,7 @@ async def generate_course(request: GenerateCourseRequest):
     Generate a full course structure using Google Gemini.
     """
     # Reload key from env just in case it was set after startup
-    current_api_key = os.getenv("GEMINI_API_KEY")
+    current_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
     if not current_api_key:
          # Fallback to the module level one if env var is missing or not reloaded
          current_api_key = api_key
