@@ -16,7 +16,6 @@ import CourseBuilder from "./pages/CourseBuilder";
 import CourseViewer from "./pages/CourseViewer";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
-import Settings from "./pages/Settings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import ScrollToTop from "./components/ScrollToTop";
@@ -42,7 +41,6 @@ function App() {
           <Route path="/course-builder/:id" element={<CourseBuilder />} />
           <Route path="/course/:id" element={<CourseViewer />} />
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
