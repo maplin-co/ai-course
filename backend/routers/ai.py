@@ -1,4 +1,8 @@
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 import os
 import json
 import logging
@@ -9,10 +13,9 @@ from typing import List, Optional
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 logger = logging.getLogger(__name__)
 
-# Configure Gemini
-# Configure Gemini
+# Configure Gemini if available
 api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
-if api_key:
+if genai and api_key:
     genai.configure(api_key=api_key)
 
 class GenerateCourseRequest(BaseModel):
@@ -38,6 +41,9 @@ async def generate_course(request: GenerateCourseRequest):
     """
     Generate a full course structure using Google Gemini.
     """
+    if not genai:
+         raise HTTPException(status_code=500, detail="Gemini AI Library not installed on server (ImportError)")
+
     # Reload key from env just in case it was set after startup
     current_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
     if not current_api_key:
