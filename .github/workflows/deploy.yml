@@ -61,7 +61,6 @@ jobs:
             **/.git*/**
             **/.github*
             **/.github*/**
-            **/.htaccess
           dangerous-clean-slate: false
 
       - name: 📂 Sync Backend to Hostinger
