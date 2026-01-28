@@ -23,7 +23,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, X, Loader2 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.REACT_APP_API_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
 
 // Sidebar Item Component (Draggable)
 const SidebarItem = ({ type, icon, label }) => {
@@ -379,17 +380,14 @@ const CourseBuilder = () => {
             setModules(prev => [...prev, ...newModules]);
         } catch (error) {
             console.error("AI Generation Failed:", error);
+            const targetUrl = `${API_BASE}/api/ai/generate-course`;
             let msg = "Failed to generate content.";
 
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
                 msg = error.response.data.detail || `Server Error: ${error.response.status} ${error.response.statusText}`;
             } else if (error.request) {
-                // The request was made but no response was received
-                msg = "No response from server. Possible Network/CORS Error or Timeout.";
+                msg = `No response at ${targetUrl}. Possible Connection/CORS/Timeout issue.`;
             } else {
-                // Something happened in setting up the request that triggered an Error
                 msg = error.message;
             }
 
