@@ -370,14 +370,21 @@ const CourseBuilder = () => {
 
             const generatedData = response.data;
 
+            if (!generatedData || !generatedData.modules || !Array.isArray(generatedData.modules)) {
+                throw new Error("AI response was missing the expected course modules.");
+            }
+
             // Map generated modules to ensure they have unique IDs for the builder
             const newModules = generatedData.modules.map((m, index) => ({
                 id: `gen-${Date.now()}-${index}`,
-                title: m.title,
+                title: m.title || "Untitled Module",
                 content: m.content || []
             }));
 
             setModules(prev => [...prev, ...newModules]);
+            if (generatedData.description) {
+                setCourseDescription(generatedData.description);
+            }
         } catch (error) {
             console.error("AI Generation Failed:", error);
             const targetUrl = `${API_BASE}/api/ai/generate-course`;

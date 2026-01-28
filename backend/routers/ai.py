@@ -115,13 +115,42 @@ async def generate_course(request: GenerateCourseRequest):
             
         course_data = json.loads(text_response.strip())
         
-        # Add IDs to make it compatible with frontend Sortable/Draggable
+        # Add IDs and validate structure
         import time
         base_id = int(time.time())
+        
+        # Ensure 'modules' exists
+        if 'modules' not in course_data:
+            # Try to find modules if it was nested or named differently
+            for key in ['Modules', 'course_modules', 'lessons']:
+                if key in course_data:
+                    course_data['modules'] = course_data.pop(key)
+                    break
+            else:
+                course_data['modules'] = []
+
+        final_modules = []
         for m_idx, module in enumerate(course_data.get('modules', [])):
-            module['id'] = f"mod-{base_id}-{m_idx}"
-            # Ensure content is simple list of objects
+            if not isinstance(module, dict): continue
             
+            clean_module = {
+                "id": f"mod-{base_id}-{m_idx}",
+                "title": module.get("title", f"Module {m_idx + 1}"),
+                "content": []
+            }
+            
+            # Map content items
+            for item in module.get("content", []):
+                if not isinstance(item, dict): continue
+                clean_module["content"].append({
+                    "type": item.get("type", "text"),
+                    "text": item.get("text", "Lesson Content"),
+                    "icon": item.get("icon", "📄")
+                })
+            
+            final_modules.append(clean_module)
+            
+        course_data['modules'] = final_modules
         return course_data
 
     except ImportError:
