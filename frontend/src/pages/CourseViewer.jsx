@@ -236,8 +236,8 @@ const CourseViewer = () => {
                                 <div className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
                                     Module {activeModule + 1} • Lesson {activeLesson + 1}
                                 </div>
-                                <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-                                    {currentLesson?.text || "Welcome to the Lesson"}
+                                <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tighter">
+                                    {currentLesson?.title || (currentLesson?.text && currentLesson.text.substring(0, 50) + "...") || "Welcome to the Lesson"}
                                 </h2>
                             </div>
                             <div className="hidden md:block">
@@ -256,8 +256,8 @@ const CourseViewer = () => {
                             </div>
                         </div>
 
-                        {/* Lesson Content Area */}
-                        <div className="bg-gray-50 rounded-[2rem] border border-gray-100 p-8 min-h-[500px] flex flex-col items-center justify-center text-center relative overflow-hidden mb-10 shadow-inner">
+                        {/* Lesson Content Area (The "Screen") */}
+                        <div className="bg-gray-50 rounded-[2rem] border border-gray-100 p-8 min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden mb-8 shadow-inner">
                             {/* Ambient BG */}
                             <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900 rounded-full blur-[150px]"></div>
@@ -366,15 +366,32 @@ const CourseViewer = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="text-left w-full max-w-2xl z-10">
-                                    <div className="prose prose-lg prose-blue max-w-none">
-                                        <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                                            {currentLesson?.text || "Welcome to the course! Use the sidebar to navigate through lessons."}
-                                        </div>
+                                <div className="max-w-md w-full z-10 text-center animate-in fade-in zoom-in duration-500">
+                                    <div className="w-24 h-24 bg-white shadow-xl shadow-blue-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-blue-50 relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent"></div>
+                                        <span className="text-5xl group-hover:scale-110 transition-transform duration-500">{currentLesson?.icon || '📄'}</span>
                                     </div>
+                                    <h3 className="text-2xl font-black mb-2 text-gray-900 tracking-tight">{currentLesson?.title || "Reading Lesson"}</h3>
+                                    <p className="text-gray-500 font-medium tracking-wide uppercase text-[10px]">Read the lesson details below</p>
                                 </div>
                             )}
                         </div>
+
+                        {/* Detailed Lesson Text (Below the screen) */}
+                        {!quizMode && currentLesson?.text && (
+                            <div className="mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="h-px flex-1 bg-gray-100"></div>
+                                    <div className="px-4 py-1.5 bg-blue-50 rounded-full text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Learning Material</div>
+                                    <div className="h-px flex-1 bg-gray-100"></div>
+                                </div>
+                                <div className="prose prose-lg prose-blue max-w-none">
+                                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg bg-white p-10 md:p-14 rounded-[2.5rem] border border-gray-100 shadow-sm font-medium">
+                                        {currentLesson.text}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Navigation Buttons (Footer) */}
                         <div className="flex justify-between items-center ">

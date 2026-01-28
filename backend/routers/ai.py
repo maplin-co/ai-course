@@ -29,7 +29,8 @@ class QuizQuestion(BaseModel):
 
 class ModuleContent(BaseModel):
     type: str  # text, video, quiz, file
-    text: str
+    title: str # Short lesson title
+    text: str  # Long educational content or description
     icon: str
 
 class Module(BaseModel):
@@ -106,8 +107,15 @@ async def generate_course(request: GenerateCourseRequest):
                     "content": [
                         {{ 
                             "type": "text", 
+                            "title": "Short Lesson Title",
                             "text": "Detailed educational lesson content (2-3 paragraphs)...", 
                             "icon": "📄" 
+                        }},
+                        {{ 
+                            "type": "video", 
+                            "title": "Video Lecture Title",
+                            "text": "Brief description of what this video covers.", 
+                            "icon": "📽️" 
                         }}
                     ],
                     "quiz": [
@@ -208,6 +216,7 @@ async def generate_course(request: GenerateCourseRequest):
                 if not isinstance(item, dict): continue
                 clean_module["content"].append({
                     "type": item.get("type", "text"),
+                    "title": item.get("title", item.get("text", "New Lesson")[:50]),
                     "text": item.get("text", "Lesson Content"),
                     "icon": item.get("icon", "📄")
                 })
