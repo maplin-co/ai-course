@@ -226,6 +226,38 @@ Database (PostgreSQL) → Neon/Supabase/ElephantSQL
 4. Set build command: `cd frontend && npm install && npm run build`
 5. Set publish directory: `frontend/build`
 
+**Method 4: GitHub Actions (Automated)**
+
+If you want to deploy automatically when you push to GitHub, create `.github/workflows/deploy.yml`.
+**Note:** The `security: loose` setting is critical for Hostinger to prevent Error 425.
+
+```yaml
+name: Deploy to Hostinger
+on:
+  push:
+    branches: [ main ]
+jobs:
+  web-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm install
+        npm run build
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./frontend/build/
+        server-dir: ./public_html/
+        protocol: ftps
+        security: loose # REQUIRED for Hostinger to prevent "425 Unable to build data connection"
+```
+
 ### 4.3 Configure .htaccess for React Router
 
 Create a `.htaccess` file in `public_html`:
