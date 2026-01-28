@@ -98,6 +98,10 @@ async def generate_course(request: GenerateCourseRequest):
             
         return course_data
 
+    except ImportError:
+        logger.error("google.generativeai library not found")
+        raise HTTPException(status_code=500, detail="Gemini AI Library not installed on server")
     except Exception as e:
         logger.error(f"AI Generation failed: {e}")
+        # Return the actual error string to frontend for easier debugging
         raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")
