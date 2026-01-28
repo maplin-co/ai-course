@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { ArrowRight, Loader2 } from 'lucide-react';
+
+const API_BASE = process.env.REACT_APP_API_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -7,22 +12,39 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
 
-        // Get registered users from localStorage
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        try {
+            const formData = new FormData();
+            formData.append('username', email);
+            formData.append('password', password);
 
-        // Find user
-        const user = registeredUsers.find(u => u.email === email && u.password === password);
+            const response = await axios.post(`${API_BASE}/api/auth/token`, formData);
 
-        if (user) {
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userName', user.name);
-            navigate('/dashboard');
-        } else {
-            setError('Invalid email or password. Please sign up first if you haven\'t.');
+            if (response.data.access_token) {
+                localStorage.setItem('token', response.data.access_token);
+                localStorage.setItem('isLoggedIn', 'true');
+
+                // Get user info
+                const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
+                    headers: { Authorization: `Bearer ${response.data.access_token}` }
+                });
+
+                localStorage.setItem('userName', userRes.data.full_name || 'User');
+                localStorage.setItem('userEmail', userRes.data.email);
+
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setError(error.response?.data?.detail || 'Invalid email or password.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -97,10 +119,11 @@ const Login = () => {
                                 placeholder="Enter your password" />
                         </div>
 
-                        <button type="submit"
-                            className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/20 hover:bg-gray-800 transition-all flex items-center justify-center group">
-                            Sign In to Dashboard
-                            <span className="ml-3 group-hover:translate-x-1 transition-transform">→</span>
+                        <button type="submit" disabled={loading}
+                            className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/10 hover:bg-gray-800 transition-all flex items-center justify-center group relative overflow-hidden">
+                            {loading && <div className="absolute inset-0 bg-black/20 flex items-center justify-center"><Loader2 className="animate-spin" /></div>}
+                            <span className={loading ? 'opacity-0' : 'opacity-100'}>Sign In to Dashboard</span>
+                            <ArrowRight className={`ml-3 group-hover:translate-x-1 transition-transform ${loading ? 'opacity-0' : 'opacity-100'}`} size={18} />
                         </button>
                     </form>
 

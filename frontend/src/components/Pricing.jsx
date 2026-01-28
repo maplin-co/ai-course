@@ -122,7 +122,7 @@ const Pricing = () => {
               </CardContent>
 
               <CardFooter>
-                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/checkout'} className="w-full">
+                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/signup'} className="w-full">
                   <Button
                     className={`w-full ${plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'

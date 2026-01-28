@@ -8,6 +8,7 @@ from backend.services.email import email_service
 from datetime import timedelta
 import logging
 import pymongo.errors
+import secrets
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -18,17 +19,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
 async def signup(user: UserCreate):
     
     hashed_password = get_password_hash(user.password)
+    verification_token = secrets.token_urlsafe(32)
+    
     user_dict = user.model_dump()
     user_dict["hashed_password"] = hashed_password
+    user_dict["is_verified"] = False
+    user_dict["verification_token"] = verification_token
     del user_dict["password"]
     
-    # Create user object
-    # Pydantic model handles ID generation
-    # But wait, UserInDB structure?
-    # keeping it simple
     new_user = User(**user_dict)
     
-    # Use the generated UUID as the MongoDB _id
     user_doc = new_user.model_dump()
     user_doc["_id"] = user_doc["id"]
     
@@ -40,35 +40,61 @@ async def signup(user: UserCreate):
             detail="Email already registered"
         )
     
-    # Send welcome email (non-blocking in a real app would use background tasks)
+    # Send verification email
+    verify_url = f"https://pohei.de/verify-email?token={verification_token}"
     await email_service.send_email(
         to_emails=[user.email],
-        subject="Welcome to LearnFlow! 🚀",
+        subject="Verify your LearnFlow account 🛡️",
         html_content=f"""
-            <h1>Welcome, {user.full_name or 'there'}!</h1>
-            <p>We're excited to have you on board. Your 7-day free trial has started.</p>
-            <p>Get started by building your first course with FlowAI.</p>
-            <a href="https://learnflow.ai/dashboard">Go to Dashboard</a>
+            <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+                <h1 style="color: #2563eb;">Welcome to LearnFlow, {user.full_name or 'there'}!</h1>
+                <p>To start your 7-day free trial and access your academy, please verify your email address:</p>
+                <div style="margin: 30px 0;">
+                    <a href="{verify_url}" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Verify Email Address</a>
+                </div>
+                <p style="color: #6b7280; font-size: 0.875rem;">If you didn't create an account, you can safely ignore this email.</p>
+            </div>
         """
     )
     
-    # Security: Ensure hashed_password is not returned in the response
     if hasattr(new_user, "hashed_password"):
         delattr(new_user, "hashed_password")
+    if hasattr(new_user, "verification_token"):
+        delattr(new_user, "verification_token")
         
     return new_user
+
+@router.get("/verify-email")
+async def verify_email(token: str):
+    user = await db.users.find_one({"verification_token": token})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token"
+        )
+    
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"is_verified": True}, "$unset": {"verification_token": ""}}
+    )
+    
+    return {"message": "Email verified successfully! You can now sign in."}
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user_dict = await db.users.find_one({"email": form_data.username})
     
-    # Security: Mitigate timing attacks by avoiding early return on user not found
-    # Note: A full fix requires a dummy hash verification when user is None
     if not user_dict or not verify_password(form_data.password, user_dict["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user_dict.get("is_verified", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email address before signing in."
         )
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

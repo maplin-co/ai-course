@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { CheckCircle, Mail, ArrowRight, Loader2 } from 'lucide-react';
+
+const API_BASE = process.env.REACT_APP_API_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
 
 const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [isSignedUp, setIsSignedUp] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setErrorMessage('');
 
-        // Get existing users
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        try {
+            const response = await axios.post(`${API_BASE}/api/auth/signup`, {
+                email,
+                password,
+                full_name: name
+            });
 
-        // Check if user already exists
-        if (registeredUsers.some(u => u.email === email)) {
-            alert('User with this email already exists. Please sign in.');
-            navigate('/login');
-            return;
+            if (response.status === 200 || response.status === 201) {
+                setIsSignedUp(true);
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            setErrorMessage(error.response?.data?.detail || 'Signup failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        // Add new user
-        const newUser = { name, email, password };
-        registeredUsers.push(newUser);
-        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-
-        // Auto login
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userName', name);
-        localStorage.setItem('userEmail', email);
-
-        alert('Account created successfully!');
-        navigate('/ai-resources');
     };
 
     return (
@@ -91,89 +95,83 @@ const Signup = () => {
             </div>
 
             {/* Right side: Form */}
-            <div className="w-full lg:w-1/2 p-6 md:p-20 flex flex-col justify-center">
+            <div className="w-full lg:w-1/2 p-6 md:p-20 flex flex-col justify-center bg-white lg:bg-transparent">
                 <div className="max-w-md mx-auto w-full">
-                    <h2 className="text-3xl font-bold mb-2">Create Your Account</h2>
-                    <p className="text-gray-500 mb-10">Choose your path and start your zero-risk trial.</p>
+                    {isSignedUp ? (
+                        <div className="text-center animate-in fade-in zoom-in duration-700">
+                            <div className="w-24 h-24 bg-blue-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
+                                <Mail size={48} className="text-blue-600" />
+                            </div>
+                            <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">Check Your Inbox!</h2>
+                            <p className="text-gray-600 mb-10 leading-relaxed">
+                                We've sent a verification link to <span className="font-bold text-gray-900">{email}</span>.
+                                Please click the link in the email to activate your account and start your trial.
+                            </p>
+                            <div className="space-y-4">
+                                <Link to="/login" className="block w-full h-14 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all">
+                                    Sign In After Verifying
+                                </Link>
+                                <button onClick={() => setIsSignedUp(false)} className="text-sm font-bold text-blue-600 uppercase tracking-widest hover:underline">
+                                    Wrong email? Try again
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="text-3xl font-black mb-2 tracking-tighter">Create Your Account</h2>
+                            <p className="text-gray-500 mb-10">Choose your path and start your zero-risk trial.</p>
 
-                    <form className="space-y-6" onSubmit={handleSignup}>
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                            <label className="relative cursor-pointer">
-                                <input type="radio" name="plan" className="peer hidden" defaultChecked />
-                                <div
-                                    className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                    <p className="font-bold text-gray-900">Basic Trial</p>
+                            <form className="space-y-5" onSubmit={handleSignup}>
+                                {errorMessage && (
+                                    <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl mb-6 italic">
+                                        {errorMessage}
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <label className="relative cursor-pointer">
+                                        <input type="radio" name="plan" className="peer hidden" defaultChecked />
+                                        <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
+                                            <p className="font-bold text-gray-900">Basic Trial</p>
+                                        </div>
+                                    </label>
+                                    <label className="relative cursor-pointer">
+                                        <input type="radio" name="plan" className="peer hidden" />
+                                        <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
+                                            <p className="font-bold text-gray-900">Pro Trial</p>
+                                        </div>
+                                    </label>
                                 </div>
-                                <div
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center peer-checked:opacity-100 opacity-0 transition-opacity">
-                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLink="round" strokeLinejoin="round" strokeWidth="3"
-                                            d="M5 13l4 4L19 7"></path>
-                                    </svg>
+
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
+                                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
                                 </div>
-                            </label>
-                            <label className="relative cursor-pointer">
-                                <input type="radio" name="plan" className="peer hidden" />
-                                <div
-                                    className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all text-center">
-                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                    <p className="font-bold text-gray-900">Pro Trial</p>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+                                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="john@company.com" />
                                 </div>
-                                <div
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center peer-checked:opacity-100 opacity-0 transition-opacity">
-                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLink="round" strokeLinejoin="round" strokeWidth="3"
-                                            d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                                    <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Minimum 8 characters" />
                                 </div>
-                            </label>
-                        </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full
-                                Name</label>
-                            <input type="text" required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="John Doe" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email
-                                Address</label>
-                            <input type="email" required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="john@company.com" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
-                            <input type="password" required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="Minimum 8 characters" />
-                        </div>
+                                <div className="flex items-center space-x-2 py-2">
+                                    <input type="checkbox" required id="consent" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                    <label htmlFor="consent" className="text-[10px] text-gray-500">I agree to the <Link to="/terms" className="text-blue-600 underline">Terms</Link> and <Link to="/privacy" className="text-blue-600 underline">Privacy Policy</Link>.</label>
+                                </div>
 
-                        <div className="flex items-center space-x-2 py-4">
-                            <input type="checkbox" required id="consent"
-                                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                            <label htmlFor="consent" className="text-xs text-gray-500">I agree to the <Link to="/terms"
-                                className="text-blue-600 underline">Terms</Link> and <Link to="/privacy"
-                                    className="text-blue-600 underline">Privacy Policy</Link>.</label>
-                        </div>
+                                <button type="submit" disabled={loading} className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/10 hover:bg-gray-800 transition-all flex items-center justify-center group relative overflow-hidden">
+                                    {loading && <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10"><Loader2 className="animate-spin" /></div>}
+                                    <span className={loading ? 'opacity-0' : 'opacity-100'}>Start My 7-Day Free Trial</span>
+                                    <ArrowRight size={18} className={`ml-3 group-hover:translate-x-1 transition-transform ${loading ? 'opacity-0' : 'opacity-100'}`} />
+                                </button>
+                            </form>
 
-                        <button type="submit"
-                            className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/20 hover:bg-gray-800 transition-all flex items-center justify-center group">
-                            Start My 7-Day Free Trial
-                            <span className="ml-3 group-hover:translate-x-1 transition-transform">→</span>
-                        </button>
-                    </form>
-
-                    <p className="text-center mt-10 text-sm text-gray-500">Already have an account? <Link to="/login"
-                        className="text-blue-600 font-bold">Sign In</Link></p>
+                            <p className="text-center mt-8 text-sm text-gray-500 font-medium">Already have an account? <Link to="/login" className="text-blue-600 font-black">Sign In</Link></p>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

@@ -24,12 +24,15 @@ class UserInDB(UserBase):
     hashed_password: str
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
+    is_verified: bool = False
+    verification_token: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class User(UserBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     full_name: Optional[str] = None
     disabled: Optional[bool] = False
+    is_verified: bool = False
     
     # helper to convert from mongo dict
     @classmethod

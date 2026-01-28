@@ -229,15 +229,15 @@ const CourseViewer = () => {
                 </aside>
 
                 {/* Main Content Viewer */}
-                <main className="flex-1 overflow-y-auto bg-white p-6 md:p-12 lg:p-16 h-full">
+                <main className="flex-1 overflow-y-auto bg-white p-4 md:p-8 lg:p-12 h-full">
                     <div className="max-w-4xl mx-auto pb-24">
                         <div className="mb-8 flex items-end justify-between">
                             <div>
                                 <div className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
                                     Module {activeModule + 1} • Lesson {activeLesson + 1}
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tighter">
-                                    {currentLesson?.title || (currentLesson?.text && currentLesson.text.substring(0, 50) + "...") || "Welcome to the Lesson"}
+                                <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tighter uppercase">
+                                    {currentLesson?.title || "Lesson Content"}
                                 </h2>
                             </div>
                             <div className="hidden md:block">
@@ -257,7 +257,7 @@ const CourseViewer = () => {
                         </div>
 
                         {/* Lesson Content Area (The "Screen") */}
-                        <div className="bg-gray-50 rounded-[2rem] border border-gray-100 p-8 min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden mb-8 shadow-inner">
+                        <div className="bg-gray-100 rounded-[1.5rem] md:rounded-[2rem] border border-gray-200 p-6 md:p-10 min-h-[300px] md:min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden mb-10 shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)]">
                             {/* Ambient BG */}
                             <div className="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none">
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900 rounded-full blur-[150px]"></div>
