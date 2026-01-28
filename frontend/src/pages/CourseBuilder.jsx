@@ -379,7 +379,8 @@ const CourseBuilder = () => {
             setModules(prev => [...prev, ...newModules]);
         } catch (error) {
             console.error("AI Generation Failed:", error);
-            alert("Failed to generate content. Ensure backend is running and API Key is set.");
+            const errorMessage = error.response?.data?.detail || "Failed to generate content. Please try again.";
+            alert(errorMessage);
         } finally {
             setIsGenerating(false);
         }

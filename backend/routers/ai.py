@@ -78,7 +78,23 @@ async def generate_course(request: GenerateCourseRequest):
         Do not use Markdown formatting (like ```json), just return the raw JSON string.
         """
         
-        response = model.generate_content(prompt)
+        # Retry logic with exponential backoff
+        max_retries = 3
+        import asyncio
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(prompt)
+                break # Success, exit loop
+            except Exception as e:
+                if "429" in str(e) or "Too Many Requests" in str(e):
+                    if attempt < max_retries - 1:
+                        wait_time = 2 ** attempt
+                        logger.warning(f"Rate limit hit. Retrying in {wait_time}s...")
+                        await asyncio.sleep(wait_time)
+                    else:
+                        raise HTTPException(status_code=429, detail="System busy (Rate Limit). Please try again later.")
+                else:
+                    raise e # Re-raise if it's not a rate limit error
         
         # Clean response if it contains markdown code blocks
         text_response = response.text
