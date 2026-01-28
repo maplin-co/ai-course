@@ -87,6 +87,7 @@ async def generate_course(request: GenerateCourseRequest):
         # Retry logic with exponential backoff
         max_retries = 3
         import asyncio
+        response = None
         for attempt in range(max_retries):
             try:
                 response = model.generate_content(prompt)
@@ -102,6 +103,9 @@ async def generate_course(request: GenerateCourseRequest):
                 else:
                     raise e # Re-raise if it's not a rate limit error
         
+        if not response:
+             raise HTTPException(status_code=500, detail="Failed to get valid response from AI after retries")
+
         # Clean response if it contains markdown code blocks
         text_response = response.text
         if text_response.startswith("```json"):
