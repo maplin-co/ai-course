@@ -85,29 +85,43 @@ async def generate_course(request: GenerateCourseRequest):
             raise HTTPException(status_code=500, detail="No suitable Gemini model found. Check API key permissions.")
         
         prompt = f"""
-        Act as an expert educational curriculum designer.
-        Create a comprehensive, structured course outline for the topic: "{request.topic}".
+        Act as an expert educational curriculum designer and subject matter expert.
+        Create a comprehensive, deeply educational course for the topic: "{request.topic}".
         Target Audience: {request.target_audience}.
         
         The output MUST be valid, parseable JSON with the following structure:
         {{
-            "title": "Engaging Course Title",
-            "description": "Compelling 2-sentence description.",
+            "title": "A Professional and Engaging Course Title",
+            "description": "A compelling 2-3 sentence overview that explains what the student will achieve.",
             "modules": [
                 {{
-                    "title": "Module 1: Title",
+                    "title": "Module 1: Clear and Descriptive Title",
                     "content": [
-                        {{ "type": "text", "text": "Lesson topic description...", "icon": "📄" }},
-                        {{ "type": "video", "text": "Video lecture title...", "icon": "📽️" }},
-                        {{ "type": "quiz", "text": "Quiz title...", "icon": "❓" }}
+                        {{ 
+                            "type": "text", 
+                            "text": "Provide a 2-3 paragraph detailed educational lesson on a specific sub-topic here. This should contain actual facts and teaching points.", 
+                            "icon": "📄" 
+                        }},
+                        {{ 
+                            "type": "video", 
+                            "text": "Detailed Title for a suggested video lecture (e.g., 'Mastering the basics of...')", 
+                            "icon": "📽️" 
+                        }},
+                        {{ 
+                            "type": "quiz", 
+                            "text": "A specific quiz topic related to this lesson.", 
+                            "icon": "❓" 
+                        }}
                     ]
                 }}
             ]
         }}
         
-        Create at least 4 modules.
-        Each module should have 3-5 content items mixed (text, video, quiz).
-        Do not use Markdown formatting (like ```json), just return the raw JSON string.
+        CRITICAL REQUIREMENTS:
+        1. Create exactly 4-6 high-quality modules.
+        2. Each module MUST have 3-5 content items.
+        3. For "text" type items, provide ACTUAL educational content, not placeholders. Explain concepts clearly.
+        4. Ensure the JSON is valid and does not contain any Markdown code blocks or extra text.
         """
         
         # Retry logic with exponential backoff
