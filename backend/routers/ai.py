@@ -122,15 +122,19 @@ async def generate_course(request: GenerateCourseRequest):
             # Try to load raw text if no braces found (unlikely for valid JSON)
             course_data = json.loads(text_response)
         
+        if not isinstance(course_data, dict):
+            # If the AI returned a list or just a string, wrap it
+            course_data = {"title": request.topic, "modules": course_data if isinstance(course_data, list) else []}
+
         # Add IDs and validate structure
         import time
         base_id = int(time.time())
         
-        # Ensure 'modules' exists
-        if 'modules' not in course_data:
+        # Ensure 'modules' exists and is a list
+        if 'modules' not in course_data or not isinstance(course_data['modules'], list):
             # Try to find modules if it was nested or named differently
-            for key in ['Modules', 'course_modules', 'lessons']:
-                if key in course_data:
+            for key in ['Modules', 'course_modules', 'lessons', 'sections']:
+                if key in course_data and isinstance(course_data[key], list):
                     course_data['modules'] = course_data.pop(key)
                     break
             else:
@@ -155,10 +159,14 @@ async def generate_course(request: GenerateCourseRequest):
                     "icon": item.get("icon", "📄")
                 })
             
-            final_modules.append(clean_module)
+            if clean_module["title"]:
+                final_modules.append(clean_module)
             
-        course_data['modules'] = final_modules
-        return course_data
+        return {
+            "title": course_data.get("title", request.topic),
+            "description": course_data.get("description", f"Course about {request.topic}"),
+            "modules": final_modules
+        }
 
     except ImportError:
         logger.error("google.generativeai library not found")

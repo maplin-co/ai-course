@@ -369,6 +369,7 @@ const CourseBuilder = () => {
             });
 
             const generatedData = response.data;
+            console.log("DEBUG: AI Raw Response Body:", generatedData);
 
             if (!generatedData || !generatedData.modules || !Array.isArray(generatedData.modules)) {
                 throw new Error("AI response was missing the expected course modules.");
