@@ -56,7 +56,7 @@ async def generate_course(request: GenerateCourseRequest):
     genai.configure(api_key=current_api_key)
 
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""
         Act as an expert educational curriculum designer.
