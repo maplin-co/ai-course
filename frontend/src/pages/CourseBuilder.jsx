@@ -379,8 +379,21 @@ const CourseBuilder = () => {
             setModules(prev => [...prev, ...newModules]);
         } catch (error) {
             console.error("AI Generation Failed:", error);
-            const errorMessage = error.response?.data?.detail || "Failed to generate content. Please try again.";
-            alert(errorMessage);
+            let msg = "Failed to generate content.";
+
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                msg = error.response.data.detail || `Server Error: ${error.response.status} ${error.response.statusText}`;
+            } else if (error.request) {
+                // The request was made but no response was received
+                msg = "No response from server. Possible Network/CORS Error or Timeout.";
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                msg = error.message;
+            }
+
+            alert(`Debug: ${msg}`);
         } finally {
             setIsGenerating(false);
         }
