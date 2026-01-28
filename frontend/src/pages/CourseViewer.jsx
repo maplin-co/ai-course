@@ -18,6 +18,10 @@ const CourseViewer = () => {
     const [activeLesson, setActiveLesson] = useState(0);
     const [loading, setLoading] = useState(true);
     const [progress, setProgress] = useState({}); // { "moduleId-lessonIndex": true }
+    const [quizMode, setQuizMode] = useState(false); // New state for quiz taking
+    const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [quizScore, setQuizScore] = useState(null);
 
     // Init data
     useEffect(() => {
@@ -113,13 +117,20 @@ const CourseViewer = () => {
     };
 
     const handleNext = () => {
-        // Auto-mark complete on next? Optional. For now manual or just "Next" logic
+        // Reset quiz states when moving to next section
+        setQuizMode(false);
+        setQuizScore(null);
+        setCurrentQuizQuestion(0);
+        setAnswers({});
 
         if (activeLesson < (course.modules[activeModule]?.content.length || 0) - 1) {
             setActiveLesson(activeLesson + 1);
         } else if (activeModule < (course.modules.length || 0) - 1) {
             setActiveModule(activeModule + 1);
             setActiveLesson(0);
+        } else if (activeModule === course.modules.length - 1 && !quizMode && course.finalExam?.length > 0) {
+            // End of lessons but have a Final Exam
+            setQuizMode(true);
         } else {
             // End of course
             confetti({
@@ -252,18 +263,85 @@ const CourseViewer = () => {
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900 rounded-full blur-[150px]"></div>
                             </div>
 
-                            {currentLesson?.type === 'video' ? (
-                                <div className="w-full h-full flex flex-col items-center z-10">
-                                    <div className="w-full aspect-video bg-black rounded-2xl flex items-center justify-center shadow-2xl mb-8 relative group overflow-hidden border border-gray-800">
-                                        {/* Placeholder for Video Player */}
-                                        <PlayCircle size={80} className="text-white/30 group-hover:scale-110 group-hover:text-blue-500 transition-all duration-500 cursor-pointer z-20" />
+                            {quizMode ? (
+                                <div className="max-w-2xl w-full z-10 text-left">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h3 className="text-xl font-bold">{quizScore !== null ? 'Results' : 'Assessment'}</h3>
+                                        <span className="text-sm font-medium text-gray-500">Question {currentQuizQuestion + 1} of {(currentModule?.quiz?.length || course.finalExam?.length)}</span>
+                                    </div>
 
+                                    {quizScore !== null ? (
+                                        <div className="text-center py-10">
+                                            <div className="text-6xl mb-6">{quizScore >= 80 ? '🎉' : '📚'}</div>
+                                            <h4 className="text-3xl font-bold mb-2">You scored {quizScore}%</h4>
+                                            <p className="text-gray-500 mb-8">{quizScore >= 80 ? 'Excellent work! You have mastered this content.' : 'Not quite there yet. Review the material and try again.'}</p>
+                                            <button
+                                                onClick={() => { setQuizMode(false); setQuizScore(null); }}
+                                                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20"
+                                            >
+                                                Return to Lesson
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            {(() => {
+                                                const questions = activeModule === course.modules.length - 1 && quizMode && !currentModule.quiz?.length ? course.finalExam : (currentModule?.quiz || []);
+                                                const q = questions[currentQuizQuestion];
+                                                if (!q) return <p>No questions found.</p>;
+                                                return (
+                                                    <>
+                                                        <p className="text-xl font-medium text-gray-900 mb-8">{q.question}</p>
+                                                        <div className="space-y-3">
+                                                            {q.options.map((option, oIdx) => (
+                                                                <button
+                                                                    key={oIdx}
+                                                                    onClick={() => setAnswers({ ...answers, [currentQuizQuestion]: option })}
+                                                                    className={`w-full p-4 rounded-xl border-2 text-left transition-all font-medium ${answers[currentQuizQuestion] === option ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                                                >
+                                                                    {option}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="mt-10 flex justify-end">
+                                                            {currentQuizQuestion < questions.length - 1 ? (
+                                                                <button
+                                                                    disabled={!answers[currentQuizQuestion]}
+                                                                    onClick={() => setCurrentQuizQuestion(currentQuizQuestion + 1)}
+                                                                    className="px-8 py-3 bg-gray-900 text-white rounded-xl font-bold disabled:opacity-30"
+                                                                >
+                                                                    Next Question
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    disabled={!answers[currentQuizQuestion]}
+                                                                    onClick={() => {
+                                                                        let correct = 0;
+                                                                        questions.forEach((qu, i) => {
+                                                                            if (answers[i] === qu.correct_answer) correct++;
+                                                                        });
+                                                                        const score = Math.round((correct / questions.length) * 100);
+                                                                        setQuizScore(score);
+                                                                    }}
+                                                                    className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold shadow-lg shadow-green-500/20"
+                                                                >
+                                                                    Submit Assessment
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : currentLesson?.type === 'video' ? (
+                                <div className="w-full h-full flex flex-col items-center z-10 text-center">
+                                    <div className="w-full aspect-video bg-black rounded-2xl flex items-center justify-center shadow-2xl mb-8 relative group overflow-hidden border border-gray-800">
+                                        <PlayCircle size={80} className="text-white/30 group-hover:scale-110 group-hover:text-blue-500 transition-all duration-500 cursor-pointer z-20" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
-                                        <div className="absolute bottom-6 left-8 right-8 z-20">
+                                        <div className="absolute bottom-6 left-8 right-8 z-20 text-left">
                                             <div className="h-1 bg-white/20 rounded-full overflow-hidden cursor-pointer hover:h-2 transition-all">
-                                                <div className="h-full bg-blue-500 w-1/3 relative">
-                                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100"></div>
-                                                </div>
+                                                <div className="h-full bg-blue-500 w-1/3 relative"></div>
                                             </div>
                                             <div className="flex justify-between text-xs font-medium text-gray-400 mt-3">
                                                 <span>04:20</span>
@@ -273,41 +351,26 @@ const CourseViewer = () => {
                                     </div>
                                     <p className="text-gray-500 font-medium">Video Source: {currentLesson.text}</p>
                                 </div>
-                            ) : currentLesson?.type === 'quiz' ? (
-                                <div className="max-w-md w-full z-10">
+                            ) : currentLesson?.type === 'quiz' || (currentModule?.quiz?.length > 0 && currentLesson?.text?.toLowerCase().includes('quiz')) ? (
+                                <div className="max-w-md w-full z-10 text-center">
                                     <div className="w-20 h-20 bg-white shadow-xl shadow-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-purple-50">
                                         <HelpCircle size={40} className="text-purple-600" />
                                     </div>
-                                    <h3 className="text-2xl font-extrabold mb-4 text-gray-900">Knowledge Check</h3>
-                                    <p className="text-gray-500 mb-10 leading-relaxed">Test your understanding of the core concepts from this module. Score 80% or higher to pass.</p>
-                                    <button className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold hover:bg-purple-700 transition-all shadow-xl shadow-purple-600/20 active:scale-95">
+                                    <h3 className="text-2xl font-extrabold mb-4 text-gray-900">Module Quiz</h3>
+                                    <p className="text-gray-500 mb-10 leading-relaxed">Test your understanding of {currentModule.title}. You'll need an 80% to pass.</p>
+                                    <button
+                                        onClick={() => setQuizMode(true)}
+                                        className="w-full py-4 bg-purple-600 text-white rounded-2xl font-bold hover:bg-purple-700 transition-all shadow-xl shadow-purple-600/20 active:scale-95"
+                                    >
                                         Start Quiz
-                                    </button>
-                                </div>
-                            ) : currentLesson?.type === 'file' ? (
-                                <div className="max-w-md w-full z-10">
-                                    <div className="w-20 h-20 bg-white shadow-xl shadow-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-orange-50">
-                                        <FileText size={40} className="text-orange-600" />
-                                    </div>
-                                    <h3 className="text-2xl font-extrabold mb-4 text-gray-900">Download Resources</h3>
-                                    <p className="text-gray-500 mb-10 leading-relaxed">Get the cheat sheet and exercise files for this lesson.</p>
-                                    <button className="w-full py-4 bg-orange-600 text-white rounded-2xl font-bold hover:bg-orange-700 transition-all shadow-xl shadow-orange-600/20 active:scale-95">
-                                        Download Files (.PDF)
                                     </button>
                                 </div>
                             ) : (
                                 <div className="text-left w-full max-w-2xl z-10">
                                     <div className="prose prose-lg prose-blue max-w-none">
-                                        <h3>Introduction</h3>
-                                        <p>
-                                            In this lesson, we will explore the fundamental principles that drive successful outcomes. Understanding these basics is crucial before moving to advanced topics.
-                                        </p>
-                                        <blockquote>
-                                            "The only way to do great work is to love what you do."
-                                        </blockquote>
-                                        <p>
-                                            Make sure to take notes and review the supplementary materials provided in the files section.
-                                        </p>
+                                        <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                                            {currentLesson?.text || "Welcome to the course! Use the sidebar to navigate through lessons."}
+                                        </div>
                                     </div>
                                 </div>
                             )}

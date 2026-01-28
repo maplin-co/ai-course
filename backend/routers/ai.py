@@ -22,6 +22,11 @@ class GenerateCourseRequest(BaseModel):
     topic: str
     target_audience: Optional[str] = "Beginners"
 
+class QuizQuestion(BaseModel):
+    question: str
+    options: List[str]
+    correct_answer: str
+
 class ModuleContent(BaseModel):
     type: str  # text, video, quiz, file
     text: str
@@ -30,11 +35,13 @@ class ModuleContent(BaseModel):
 class Module(BaseModel):
     title: str
     content: List[ModuleContent]
+    quiz: Optional[List[QuizQuestion]] = []
 
 class CourseStructure(BaseModel):
     title: str
     description: str
     modules: List[Module]
+    final_exam: Optional[List[QuizQuestion]] = []
 
 @router.post("/generate-course")
 async def generate_course(request: GenerateCourseRequest):
@@ -99,29 +106,34 @@ async def generate_course(request: GenerateCourseRequest):
                     "content": [
                         {{ 
                             "type": "text", 
-                            "text": "Provide a 2-3 paragraph detailed educational lesson on a specific sub-topic here. This should contain actual facts and teaching points.", 
+                            "text": "Detailed educational lesson content (2-3 paragraphs)...", 
                             "icon": "📄" 
-                        }},
-                        {{ 
-                            "type": "video", 
-                            "text": "Detailed Title for a suggested video lecture (e.g., 'Mastering the basics of...')", 
-                            "icon": "📽️" 
-                        }},
-                        {{ 
-                            "type": "quiz", 
-                            "text": "A specific quiz topic related to this lesson.", 
-                            "icon": "❓" 
+                        }}
+                    ],
+                    "quiz": [
+                        {{
+                            "question": "What is...?",
+                            "options": ["Option A", "Option B", "Option C", "Option D"],
+                            "correct_answer": "Option A"
                         }}
                     ]
+                }}
+            ],
+            "final_exam": [
+                {{
+                    "question": "Comprehensive course question...?",
+                    "options": ["Option A", "Option B", "Option C", "Option D"],
+                    "correct_answer": "Option B"
                 }}
             ]
         }}
         
         CRITICAL REQUIREMENTS:
         1. Create exactly 4-6 high-quality modules.
-        2. Each module MUST have 3-5 content items.
-        3. For "text" type items, provide ACTUAL educational content, not placeholders. Explain concepts clearly.
-        4. Ensure the JSON is valid and does not contain any Markdown code blocks or extra text.
+        2. Each module MUST have 3-5 content items (text/info) AND a quiz with 2-3 questions.
+        3. For "text" type items, provide ACTUAL educational content, not placeholders.
+        4. Include a "final_exam" with 5-10 questions covering all modules.
+        5. Ensure the JSON is valid and does not contain any Markdown code blocks or extra text.
         """
         
         # Retry logic with exponential backoff
@@ -187,7 +199,8 @@ async def generate_course(request: GenerateCourseRequest):
             clean_module = {
                 "id": f"mod-{base_id}-{m_idx}",
                 "title": module.get("title", f"Module {m_idx + 1}"),
-                "content": []
+                "content": [],
+                "quiz": module.get("quiz", [])
             }
             
             # Map content items
@@ -205,7 +218,8 @@ async def generate_course(request: GenerateCourseRequest):
         return {
             "title": course_data.get("title", request.topic),
             "description": course_data.get("description", f"Course about {request.topic}"),
-            "modules": final_modules
+            "modules": final_modules,
+            "final_exam": course_data.get("final_exam", [])
         }
 
     except ImportError:

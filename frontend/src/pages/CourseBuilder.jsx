@@ -183,6 +183,7 @@ const CourseBuilder = () => {
     const [courseTitle, setCourseTitle] = useState("New Course Title");
     const [courseDescription, setCourseDescription] = useState("Enter course description here...");
     const [modules, setModules] = useState([]);
+    const [finalExam, setFinalExam] = useState([]); // Added state for final exam
     const [isGenerating, setIsGenerating] = useState(false);
 
     const { id } = useParams();
@@ -203,6 +204,7 @@ const CourseBuilder = () => {
                 setCourseTitle(courseToEdit.title);
                 setCourseDescription(courseToEdit.description);
                 setModules(courseToEdit.modules);
+                setFinalExam(courseToEdit.finalExam || []);
             }
         }
     }, [id, navigate]);
@@ -323,6 +325,7 @@ const CourseBuilder = () => {
                 title: courseTitle,
                 description: courseDescription,
                 modules: modules,
+                finalExam: finalExam, // Save final exam
                 updatedAt: new Date().toISOString()
             };
 
@@ -383,12 +386,16 @@ const CourseBuilder = () => {
             const newModules = generatedData.modules.map((m, index) => ({
                 id: `gen-${Date.now()}-${index}`,
                 title: m.title || "Untitled Module",
-                content: m.content || []
+                content: m.content || [],
+                quiz: m.quiz || [] // Keep the quiz data
             }));
 
             setModules(prev => [...prev, ...newModules]);
             if (generatedData.description) {
                 setCourseDescription(generatedData.description);
+            }
+            if (generatedData.final_exam) {
+                setFinalExam(generatedData.final_exam);
             }
         } catch (error) {
             console.error("AI Generation Failed:", error);
