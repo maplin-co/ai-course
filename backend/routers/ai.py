@@ -106,14 +106,21 @@ async def generate_course(request: GenerateCourseRequest):
         if not response:
              raise HTTPException(status_code=500, detail="Failed to get valid response from AI after retries")
 
-        # Clean response if it contains markdown code blocks
-        text_response = response.text
-        if text_response.startswith("```json"):
-            text_response = text_response[7:]
-        if text_response.endswith("```"):
-            text_response = text_response[:-3]
-            
-        course_data = json.loads(text_response.strip())
+        # Robust JSON extraction using regex
+        text_response = response.text.strip()
+        import re
+        
+        # Find everything between the first { and the last }
+        json_match = re.search(r'(\{.*\})', text_response, re.DOTALL)
+        if json_match:
+            try:
+                course_data = json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                # Fallback to original strip logic if regex-extracted JSON is also bad
+                course_data = json.loads(text_response)
+        else:
+            # Try to load raw text if no braces found (unlikely for valid JSON)
+            course_data = json.loads(text_response)
         
         # Add IDs and validate structure
         import time
