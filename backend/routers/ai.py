@@ -1,0 +1,94 @@
+import google.generativeai as genai
+import os
+import json
+import logging
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+
+router = APIRouter(prefix="/api/ai", tags=["ai"])
+logger = logging.getLogger(__name__)
+
+# Configure Gemini
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
+
+class GenerateCourseRequest(BaseModel):
+    topic: str
+    target_audience: Optional[str] = "Beginners"
+
+class ModuleContent(BaseModel):
+    type: str  # text, video, quiz, file
+    text: str
+    icon: str
+
+class Module(BaseModel):
+    title: str
+    content: List[ModuleContent]
+
+class CourseStructure(BaseModel):
+    title: str
+    description: str
+    modules: List[Module]
+
+@router.post("/generate-course")
+async def generate_course(request: GenerateCourseRequest):
+    """
+    Generate a full course structure using Google Gemini.
+    """
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+
+    try:
+        model = genai.GenerativeModel('gemini-pro')
+        
+        prompt = f"""
+        Act as an expert educational curriculum designer.
+        Create a comprehensive, structured course outline for the topic: "{request.topic}".
+        Target Audience: {request.target_audience}.
+        
+        The output MUST be valid, parseable JSON with the following structure:
+        {{
+            "title": "Engaging Course Title",
+            "description": "Compelling 2-sentence description.",
+            "modules": [
+                {{
+                    "title": "Module 1: Title",
+                    "content": [
+                        {{ "type": "text", "text": "Lesson topic description...", "icon": "📄" }},
+                        {{ "type": "video", "text": "Video lecture title...", "icon": "📽️" }},
+                        {{ "type": "quiz", "text": "Quiz title...", "icon": "❓" }}
+                    ]
+                }}
+            ]
+        }}
+        
+        Create at least 4 modules.
+        Each module should have 3-5 content items mixed (text, video, quiz).
+        Do not use Markdown formatting (like ```json), just return the raw JSON string.
+        """
+        
+        response = model.generate_content(prompt)
+        
+        # Clean response if it contains markdown code blocks
+        text_response = response.text
+        if text_response.startswith("```json"):
+            text_response = text_response[7:]
+        if text_response.endswith("```"):
+            text_response = text_response[:-3]
+            
+        course_data = json.loads(text_response.strip())
+        
+        # Add IDs to make it compatible with frontend Sortable/Draggable
+        import time
+        base_id = int(time.time())
+        for m_idx, module in enumerate(course_data.get('modules', [])):
+            module['id'] = f"mod-{base_id}-{m_idx}"
+            # Ensure content is simple list of objects
+            
+        return course_data
+
+    except Exception as e:
+        logger.error(f"AI Generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"AI generation failed: {str(e)}")

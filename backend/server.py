@@ -38,6 +38,7 @@ app.include_router(api_router)
 app.include_router(courses.router)
 app.include_router(backend.routers.enrollments.router)
 app.include_router(backend.routers.media.router)
+app.include_router(backend.routers.ai.router)
 
 # Mount static files (at the end so API takes precedence)
 static_path = os.path.join(os.path.dirname(__file__), "static")

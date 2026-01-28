@@ -112,15 +112,15 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-400 text-sm">
-              © 2025 LearnFlow. All rights reserved. Build: 2026-01-27 22:15
+              © 2025 LearnFlow. All rights reserved. Build: 2026-01-28 16:15
             </div>
             <div className="flex gap-6 text-sm">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">
                 Terms of Service
-              </a>
+              </Link>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
                 Cookie Settings
               </a>

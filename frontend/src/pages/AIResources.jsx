@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Brain, Sparkles, Wand2, MessageSquare, Layout, Globe, Zap, Shield, Cpu, Users, X, Send, Loader2 } from 'lucide-react';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 const AIResources = () => {
     const [selectedTool, setSelectedTool] = useState(null);
@@ -69,32 +72,31 @@ const AIResources = () => {
     const runTool = async () => {
         if (!toolInput) return;
         setIsGenerating(true);
+        setToolResult(null); // Clear previous result
 
         try {
-            // Real API Call to generate content
-            // Note: For now we simulate the specific response structure based on tool type
-            // but in a production environment this would hit the LLM endpoint
-
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network latency
-
             if (selectedTool.id === 'outline') {
-                const generatedModules = [
-                    `Introduction to ${toolInput}`,
-                    `Core Concepts of ${toolInput}`,
-                    `Advanced Topcis in ${toolInput}`,
-                    `Real-world Applications`
-                ];
-                setToolResult(generatedModules);
+                // Real API Call to Gemini
+                const response = await axios.post(`${API_BASE}/api/ai/generate-course`, {
+                    topic: toolInput,
+                    target_audience: "Beginner to Intermediate"
+                });
 
-                // Optionally save this as a draft course immediately?
-                // For now, let the user choose to "Go to Course Builder"
-            } else if (selectedTool.id === 'copy') {
-                setToolResult([
-                    `Headline: Master ${toolInput} in Just 4 Weeks`,
-                    "Subheadline: The most comprehensive guide to taking your skills to the next level.",
-                    "CTA: Start Learning Now - Limited Spots Available"
-                ]);
+                const courseData = response.data;
+
+                // Store full object for "Create Course" action
+                // But specifically for display, we just want the module titles
+                const moduleTitles = courseData.modules.map(m => m.title);
+                setToolResult(moduleTitles);
+
+                // Temporarily store full data in state or a ref if needed for "Edit in Builder"
+                // For simplicity, we'll just attach it to the selectedTool object momentarily or use a separate state
+                // Ideally use a dedicated state:
+                window.tempDatGeneratedCourse = courseData;
+
             } else {
+                // Fallback for other tools not yet implemented in backend
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 setToolResult([
                     "Analysis Complete: Your content has been optimized.",
                     "Suggestion: Add more interactive elements to Module 2.",
@@ -103,25 +105,19 @@ const AIResources = () => {
             }
         } catch (error) {
             console.error("Generation failed:", error);
-            setToolResult(["Error: Failed to generate content. Please try again."]);
+            setToolResult(["Error: Failed to generate content. Please try again later."]);
         } finally {
             setIsGenerating(false);
         }
     };
 
     const handleCreateCourseFromAI = () => {
-        // Here we could persist the generated outline to localStorage 
-        // before navigating, so the CourseBuilder picks it up
-        if (selectedTool.id === 'outline' && toolResult) {
+        // Use the real generated data if available
+        if (selectedTool.id === 'outline' && window.tempDatGeneratedCourse) {
             const draftCourse = {
+                ...window.tempDatGeneratedCourse,
                 id: `draft-${Date.now()}`,
-                title: toolInput,
-                description: "AI Generated Course Draft",
-                modules: toolResult.map((title, i) => ({
-                    id: `mod-${i}`,
-                    title: title,
-                    content: []
-                }))
+                createdAt: new Date().toISOString()
             };
 
             const existing = JSON.parse(localStorage.getItem('createdCourses') || '[]');

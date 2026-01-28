@@ -141,7 +141,7 @@ const Pricing = () => {
         {/* Additional Info */}
         <div className="mt-12 text-center">
           <p className="text-gray-600">
-            All plans include 7-day free trial • No credit card required • Cancel anytime
+            All plans include 7-day free trial • 0% Transaction Fees • Cancel anytime
           </p>
         </div>
       </div>

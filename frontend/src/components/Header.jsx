@@ -78,7 +78,7 @@ const Header = () => {
                     Sign in
                   </Button>
                 </Link>
-                <Link to="/signup">
+                <Link to="/checkout">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     Start free trial
                   </Button>
@@ -129,7 +129,7 @@ const Header = () => {
                         Sign in
                       </Button>
                     </Link>
-                    <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link to="/checkout" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                         Start free trial
                       </Button>
