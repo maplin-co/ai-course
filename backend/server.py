@@ -8,7 +8,7 @@ from backend.sql_database import engine, Base
 import backend.sql_models  # Ensure models are registered
 import backend.course_model # Ensure course models are registered
 import backend.enrollment_model # Ensure enrollment models are registered
-from backend.routers import auth, resources, payments, courses
+from backend.routers import auth, resources, payments, courses, enrollments, media, ai
 
 # App init
 app = FastAPI()
@@ -29,16 +29,16 @@ api_router = APIRouter(prefix="/api")
 async def root():
     return {"message": "Welcome to AI Course Backend"}
 
-# Include sub-routers
+# Include sub-routers under /api
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(resources.router, prefix="/resources", tags=["resources"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
-api_router.include_router(backend.routers.ai.router)
+api_router.include_router(ai.router)
+api_router.include_router(courses.router)
+api_router.include_router(enrollments.router)
+api_router.include_router(media.router)
 
 app.include_router(api_router)
-app.include_router(courses.router)
-app.include_router(backend.routers.enrollments.router)
-app.include_router(backend.routers.media.router)
 
 # Mount static files (at the end so API takes precedence)
 static_path = os.path.join(os.path.dirname(__file__), "static")
