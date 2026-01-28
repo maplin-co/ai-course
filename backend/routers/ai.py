@@ -37,8 +37,16 @@ async def generate_course(request: GenerateCourseRequest):
     """
     Generate a full course structure using Google Gemini.
     """
-    if not api_key:
+    # Reload key from env just in case it was set after startup
+    current_api_key = os.getenv("GEMINI_API_KEY")
+    if not current_api_key:
+         # Fallback to the module level one if env var is missing or not reloaded
+         current_api_key = api_key
+    
+    if not current_api_key:
         raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+    
+    genai.configure(api_key=current_api_key)
 
     try:
         model = genai.GenerativeModel('gemini-pro')
