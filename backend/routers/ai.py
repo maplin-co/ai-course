@@ -56,7 +56,16 @@ async def generate_course(request: GenerateCourseRequest):
     genai.configure(api_key=current_api_key)
 
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Try to find the best available model
+        model_name = 'gemini-1.5-flash'
+        try:
+            model = genai.GenerativeModel(model_name)
+        except:
+            # Fallback to latest or pro if flash is failing to init
+            model = genai.GenerativeModel('gemini-pro')
+            model_name = 'gemini-pro'
+        
+        logger.info(f"Using model: {model_name}")
         
         prompt = f"""
         Act as an expert educational curriculum designer.
