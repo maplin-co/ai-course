@@ -372,7 +372,11 @@ const CourseBuilder = () => {
             console.log("DEBUG: AI Raw Response Body:", generatedData);
 
             if (!generatedData || !generatedData.modules || !Array.isArray(generatedData.modules)) {
-                throw new Error("AI response was missing the expected course modules.");
+                let dataSnippet = JSON.stringify(generatedData).substring(0, 200);
+                if (typeof generatedData === 'string' && generatedData.startsWith('<!DOCTYPE')) {
+                    dataSnippet = "HTML detected (probably a 404 or Hostinger error page). Check your backend URL.";
+                }
+                throw new Error(`AI response was missing modules. Type: ${typeof generatedData}, Data: ${dataSnippet}`);
             }
 
             // Map generated modules to ensure they have unique IDs for the builder
