@@ -51,12 +51,20 @@ elif os.path.exists("static"):
 # Events
 @app.on_event("startup")
 async def startup_event():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created/verified successfully.")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        logger.warning("Application starting WITHOUT database connection. Some features may be limited.")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await close_mongo_connection()
+    try:
+        await close_mongo_connection()
+    except:
+        pass
 
 # Logging
 logging.basicConfig(
