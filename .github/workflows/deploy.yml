@@ -2,58 +2,65 @@
 name: Deploy to Hostinger
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - "frontend/**"
-            - ".github/workflows/deploy.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy.yml"
 
 jobs:
-    build-and-deploy:
-        name: Build and Deploy
-        runs-on: ubuntu-latest
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: 🚚 Get latest code
-              uses: actions/checkout@v4
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
 
-            - name: 🟢 Set up Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
-                  cache-dependency-path: "frontend/package.json"
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "frontend/package.json"
 
-            - name: 📦 Install dependencies
-              working-directory: ./frontend
-              run: npm install --legacy-peer-deps
+      - name: 📦 Install dependencies
+        working-directory: ./frontend
+        run: npm install --legacy-peer-deps
 
-            - name: 🏗️ Build Project
-              working-directory: ./frontend
-              run: npm run build
-              env:
-                  CI: false
-                  REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+      - name: 🏗️ Build Project
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          CI: false
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
 
-            - name: 🔍 Verify Build Directory
-              run: |
-                  if [ -d "frontend/build" ]; then
-                    echo "✅ Build directory exists"
-                    ls -la frontend/build | head -n 10
-                  else
-                    echo "❌ Build directory NOT found"
-                    exit 1
-                  fi
+      - name: 🔍 Verify Build Directory
+        run: |
+          if [ -d "frontend/build" ]; then
+            echo "✅ Build directory exists"
+            ls -la frontend/build | head -n 10
+          else
+            echo "❌ Build directory NOT found"
+            exit 1
+          fi
 
-            - name: 📂 Sync files to Hostinger
-              uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-              with:
-                  server: 46.202.180.226
-                  username: u723774100.pohei.de
-                  password: ${{ secrets.FTP_PASSWORD }}
-                  local-dir: ./frontend/build/
-                  server-dir: ./
-                  port: 21
-                  protocol: ftp
-                  dangerous-clean-slate: false
+      - name: 📂 Sync files to Hostinger
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 46.202.180.226
+          username: u723774100.pohei.de
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./frontend/build/
+          server-dir: ./
+          port: 21
+          protocol: ftps
+          security: loose
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github*
+            **/.github*/**
+            **/.htaccess
+          dangerous-clean-slate: false
