@@ -56,16 +56,33 @@ async def generate_course(request: GenerateCourseRequest):
     genai.configure(api_key=current_api_key)
 
     try:
-        # Try to find the best available model
-        model_name = 'gemini-1.5-flash'
-        try:
-            model = genai.GenerativeModel(model_name)
-        except:
-            # Fallback to latest or pro if flash is failing to init
-            model = genai.GenerativeModel('gemini-pro')
-            model_name = 'gemini-pro'
+        # Try to find the best available model in 2026 environment
+        # We try 2.0-flash first as it's the stable high-performance choice
+        model_name = 'gemini-2.0-flash'
+        model = None
         
-        logger.info(f"Using model: {model_name}")
+        # List of models to try in order of preference (including 2026 stable names)
+        models_to_try = [
+            'gemini-2.5-flash',
+            'gemini-flash-latest',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash',
+            'gemini-pro'
+        ]
+        
+        for name in models_to_try:
+            try:
+                model = genai.GenerativeModel(name)
+                # Test validity by calling a very simple property or just logging
+                model_name = name
+                logger.info(f"Successfully initialized model: {model_name}")
+                break
+            except Exception as e:
+                logger.warning(f"Model {name} not available: {e}")
+                continue
+        
+        if not model:
+            raise HTTPException(status_code=500, detail="No suitable Gemini model found. Check API key permissions.")
         
         prompt = f"""
         Act as an expert educational curriculum designer.
