@@ -14,7 +14,7 @@ router = APIRouter(prefix="/ai", tags=["ai"])
 logger = logging.getLogger(__name__)
 
 # Configure Gemini if available
-api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
+api_key = os.getenv("GEMINI_API_KEY")
 if genai and api_key:
     genai.configure(api_key=api_key)
 
@@ -45,7 +45,7 @@ async def generate_course(request: GenerateCourseRequest):
          raise HTTPException(status_code=500, detail="Gemini AI Library not installed on server (ImportError)")
 
     # Reload key from env just in case it was set after startup
-    current_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCjiCH7KD5ZioFiFgtIuXMhLlCOlz2b_BU")
+    current_api_key = os.getenv("GEMINI_API_KEY")
     if not current_api_key:
          # Fallback to the module level one if env var is missing or not reloaded
          current_api_key = api_key
