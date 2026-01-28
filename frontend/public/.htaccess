@@ -3,7 +3,9 @@
   RewriteBase /
   
   # Handle React Router - redirect all requests to index.html
+  # BUT exclude the /api path so the backend can receive requests
   RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_URI} !^/api
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
