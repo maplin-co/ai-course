@@ -5,7 +5,8 @@ import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import { BarChart3, BookOpen, Globe, Users, Plus, ArrowRight } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.REACT_APP_API_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
 
 const Dashboard = () => {
     const stats = [

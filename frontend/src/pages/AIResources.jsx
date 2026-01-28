@@ -7,7 +7,8 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Brain, Sparkles, Wand2, MessageSquare, Layout, Globe, Zap, Shield, Cpu, Users, X, Send, Loader2 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.REACT_APP_API_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
 
 const AIResources = () => {
     const [selectedTool, setSelectedTool] = useState(null);
