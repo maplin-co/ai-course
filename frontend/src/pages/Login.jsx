@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL ||
-    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+import API_BASE from '../api_config';
 
 const Login = () => {
     const [email, setEmail] = useState('');

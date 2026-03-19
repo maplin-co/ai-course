@@ -1,22 +1,21 @@
-# Deploy to Hostinger - Triggered by push to main
+# Unified Deployment for Hostinger (Frontend & Backend)
 name: Deploy to Hostinger
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - "frontend/**"
       - "backend/**"
       - ".github/workflows/deploy.yml"
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  deploy-frontend:
+    name: Frontend Deployment
     runs-on: ubuntu-latest
-
+    if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.modified, 'deploy.yml')
     steps:
-      - name: 🚚 Get latest code
+      - name: 🚚 Checkout code
         uses: actions/checkout@v4
 
       - name: 🟢 Set up Node.js
@@ -30,81 +29,60 @@ jobs:
         working-directory: ./frontend
         run: npm install --legacy-peer-deps
 
-      - name: 🏗️ Build Project
+      - name: 🏗️ Build React App
         working-directory: ./frontend
         run: npm run build
         env:
           CI: false
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
 
-      - name: 🔍 Verify Build Directory
+      - name: 📝 Create .htaccess
         run: |
-          if [ -d "frontend/build" ]; then
-            echo "✅ Build directory exists"
-            ls -la frontend/build | head -n 10
-          else
-            echo "❌ Build directory NOT found"
-            exit 1
-          fi
+          cat <<EOT > frontend/build/.htaccess
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteCond %{REQUEST_FILENAME} !-l
+            RewriteRule . /index.html [L]
+          </IfModule>
+          EOT
 
-      - name: 📂 Sync files to Hostinger
+      - name: 📂 Sync to Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 46.202.180.226
           username: u723774100.pohei.de
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./frontend/build/
-          server-dir: ./
+          server-dir: ./public_html/
           port: 21
           protocol: ftp
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.github*
-            **/.github*/**
+          security: loose
           dangerous-clean-slate: false
 
-      - name: 📂 Sync Backend to Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: 46.202.180.226
-          username: u723774100.pohei.de
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./backend/
-          server-dir: ./backend/
-          port: 21
-          protocol: ftp
-          exclude: |
-            **/.git*
-            **/__pycache__/**
-            **/*.pyc
-            **/venv/**
-            **/.env
-
-  docker-build:
-    name: Build Docker Image
+  deploy-backend:
+    name: Backend Docker Publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.modified, 'deploy.yml')
     steps:
-      - name: 🚚 Get latest code
+      - name: 🚚 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐳 Log in to GHCR
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: 🔡 Lowercase Repo Name
-        run: |
-          echo "REPO=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
-
-      - name: 🔨 Build and push
+      - name: 🏗️ Build and Push
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/${{ env.REPO }}/backend:latest
+          tags: rasali/ai-course-backend:latest

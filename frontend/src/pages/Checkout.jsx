@@ -5,8 +5,7 @@ import Footer from '../components/Footer';
 import { ShieldCheck, Lock, CreditCard, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL ||
-    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+import API_BASE from '../api_config';
 
 const Checkout = () => {
     const location = useLocation();

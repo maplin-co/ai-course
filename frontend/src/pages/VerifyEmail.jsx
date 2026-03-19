@@ -3,8 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle, XCircle, Loader2, ArrowRight } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL ||
-    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+import API_BASE from '../api_config';
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams();

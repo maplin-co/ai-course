@@ -23,8 +23,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, X, Loader2 } from 'lucide-react';
 
-const API_BASE = (process.env.REACT_APP_API_URL ||
-    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin)).replace(/\/$/, '');
+import API_BASE from '../api_config';
 
 // Sidebar Item Component (Draggable)
 const SidebarItem = ({ type, icon, label }) => {

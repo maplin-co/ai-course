@@ -6,8 +6,7 @@ import { BookOpen, PlayCircle, FileText, HelpCircle, ChevronRight, ArrowLeft, Ch
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 
-const API_BASE = process.env.REACT_APP_API_URL ||
-    (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+import API_BASE from '../api_config';
 
 const CourseViewer = () => {
     const { id } = useParams();
