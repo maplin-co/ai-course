@@ -12,11 +12,14 @@ from backend.routers import auth, resources, payments, courses, enrollments, med
 # App init
 app = FastAPI()
 
-# Middleware
+# CORS Configuration
+raw_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:8080,https://pohei.de,https://www.pohei.de,https://u723774100.pohei.de')
+origins = [origin.strip() for origin in raw_origins.split(',') if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:8080,https://pohei.de,https://www.pohei.de,https://u723774100.pohei.de').split(','),
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
