@@ -32,8 +32,15 @@ app.add_middleware(
 # API Router
 api_router = APIRouter(prefix="/api")
 
-@api_router.get("/")
+@app.get("/")
 async def root():
+    """
+    Health check endpoint for Render.
+    """
+    return {"message": "LearnFlow API is Pulse-Ready", "status": "active"}
+
+@api_router.get("/")
+async def api_root():
     return {"message": "Welcome to AI Course Backend"}
 
 # Include sub-routers under /api
@@ -47,12 +54,12 @@ api_router.include_router(media.router)
 
 app.include_router(api_router)
 
-# Mount static files (at the end so API takes precedence)
+# Mount static files if directory exists and is NOT empty
 static_path = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_path):
-    app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
-elif os.path.exists("static"):
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+if os.path.exists(static_path) and any(os.scandir(static_path)):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
+elif os.path.exists("static") and any(os.scandir("static")):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # Events
