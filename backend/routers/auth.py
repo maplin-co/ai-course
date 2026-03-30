@@ -33,8 +33,11 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
     hashed_password = get_password_hash(user.password)
     verification_token = secrets.token_urlsafe(32)
     
-    trial_days = 7
-    trial_expiry = datetime.now(timezone.utc) + timedelta(days=trial_days)
+    # Trial only for creators
+    trial_expiry = None
+    if user.role == 'creator':
+        trial_days = 7
+        trial_expiry = datetime.now(timezone.utc) + timedelta(days=trial_days)
     
     new_user = SQLUser(
         email=user.email,
@@ -43,6 +46,7 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
         is_verified=False,
         verification_token=verification_token,
         plan=user.plan or 'basic',
+        role=user.role or 'learner',
         trial_ends_at=trial_expiry
     )
     
@@ -52,13 +56,17 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
     
     # Send verification email
     verify_url = f"https://pohei.de/verify-email?token={verification_token}"
+    welcome_msg = "To start your journey, please verify your email address:"
+    if user.role == 'creator':
+        welcome_msg = "To start your 7-day free trial and access your academy, please verify your email address:"
+
     await email_service.send_email(
         to_emails=[user.email],
         subject="Verify your LearnFlow account 🛡️",
         html_content=f"""
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
                 <h1 style="color: #2563eb;">Welcome to LearnFlow, {user.full_name or 'there'}!</h1>
-                <p>To start your 7-day free trial and access your academy, please verify your email address:</p>
+                <p>{welcome_msg}</p>
                 <div style="margin: 30px 0;">
                     <a href="{verify_url}" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Verify Email Address</a>
                 </div>

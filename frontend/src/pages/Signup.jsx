@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, Mail, ArrowRight, Loader2, GraduationCap, PenTool } from 'lucide-react';
 
 import API_BASE from '../api_config';
 
@@ -9,6 +9,7 @@ const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('learner');
     const [plan, setPlan] = useState('basic');
     const [loading, setLoading] = useState(false);
     const [isSignedUp, setIsSignedUp] = useState(false);
@@ -25,7 +26,8 @@ const Signup = () => {
                 email,
                 password,
                 full_name: name,
-                plan
+                plan: role === 'creator' ? plan : 'basic',
+                role
             });
 
             if (response.status === 200 || response.status === 201) {
@@ -56,40 +58,54 @@ const Signup = () => {
                         <span className="text-2xl font-bold">LearnFlow</span>
                     </Link>
 
-                    <h1 className="text-5xl font-extrabold leading-tight mb-8">Launch your academy <br /><span
-                        className="text-blue-400">in under 5 minutes.</span></h1>
-                    <p className="text-xl text-gray-400 mb-12 max-w-md">Join 35,000+ creators who have built their entire business
-                        on our AI learning infrastructure.</p>
+                    <h1 className="text-5xl font-extrabold leading-tight mb-8">
+                        {role === 'learner' ? 'Master your craft with' : 'Launch your academy in'} <br />
+                        <span className="text-blue-400">{role === 'learner' ? 'world-class AI lessons.' : 'under 5 minutes.'}</span>
+                    </h1>
+                    <p className="text-xl text-gray-400 mb-12 max-w-md">
+                        {role === 'learner' 
+                            ? 'Gain access to the most advanced AI engineering curriculum developed by industry leaders.' 
+                            : 'Join 35,000+ creators who have built their entire business on our AI learning infrastructure.'}
+                    </p>
 
                     <div className="space-y-8">
                         <div className="flex items-start space-x-4">
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-blue-400">✨</div>
                             <div>
-                                <p className="font-bold">No Credit Card Required</p>
-                                <p className="text-sm text-gray-500">Access full features for 7 days, on us.</p>
+                                <p className="font-bold">{role === 'learner' ? 'Lifetime Benefits' : 'No Credit Card Required'}</p>
+                                <p className="text-sm text-gray-500">
+                                    {role === 'learner' ? 'One-time access to ever-evolving lessons.' : 'Access full features for 7 days, on us.'}
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-start space-x-4">
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-blue-400">🚀</div>
                             <div>
-                                <p className="font-bold">Instant Setup</p>
-                                <p className="text-sm text-gray-500">Your site is live the moment you hit "Join".</p>
+                                <p className="font-bold">{role === 'learner' ? 'Hands-on Learning' : 'Instant Setup'}</p>
+                                <p className="text-sm text-gray-500">
+                                    {role === 'learner' ? 'Direct selection on any course opens in your portal.' : 'Your site is live the moment you hit "Join".'}
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="relative z-10 pt-20 border-t border-white/10">
-                    <p className="text-gray-500 text-sm">"LearnFlow cut my course creation time in half. The AI is a game-changer."
+                    <p className="text-gray-500 text-sm">
+                        {role === 'learner' 
+                            ? '"The curriculum is updated every week. I stayed ahead of the curve as an AI Engineer."' 
+                            : '"LearnFlow cut my course creation time in half. The AI is a game-changer."'}
                     </p>
                     <div className="mt-4 flex items-center">
                         <div className="w-10 h-10 rounded-full bg-gray-700 mr-3 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&q=85&w=100"
+                            <img src={role === 'learner' 
+                                ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=srgb&fm=jpg&q=85&w=100"
+                                : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&q=85&w=100"}
                                 alt="Avatar" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-widest">Sarah Jenkins</p>
-                            <p className="text-[10px] text-gray-400">Founder, DesignAcademy</p>
+                            <p className="text-xs font-bold uppercase tracking-widest">{role === 'learner' ? 'David Chen' : 'Sarah Jenkins'}</p>
+                            <p className="text-[10px] text-gray-400">{role === 'learner' ? 'AI Student' : 'Founder, DesignAcademy'}</p>
                         </div>
                     </div>
                 </div>
@@ -106,7 +122,7 @@ const Signup = () => {
                             <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">Check Your Inbox!</h2>
                             <p className="text-gray-600 mb-10 leading-relaxed">
                                 We've sent a verification link to <span className="font-bold text-gray-900">{email}</span>.
-                                Please click the link in the email to activate your account and start your trial.
+                                Please click the link in the email to activate your account {role === 'creator' ? 'and start your trial' : ''}.
                             </p>
                             <div className="space-y-4">
                                 <Link to="/login" className="block w-full h-14 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center shadow-xl shadow-gray-200 hover:bg-gray-800 transition-all">
@@ -120,7 +136,29 @@ const Signup = () => {
                     ) : (
                         <>
                             <h2 className="text-3xl font-black mb-2 tracking-tighter">Create Your Account</h2>
-                            <p className="text-gray-500 mb-10">Choose your path and start your zero-risk trial.</p>
+                            <p className="text-gray-500 mb-10">Choose your role to customize your experience.</p>
+
+                            {/* Role Selection */}
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <button 
+                                    onClick={() => setRole('learner')}
+                                    className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-2 ${role === 'learner' ? 'border-blue-600 bg-blue-50 shadow-sm' : 'border-gray-100 opacity-60 hover:opacity-100'}`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${role === 'learner' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                        <GraduationCap size={20} />
+                                    </div>
+                                    <span className={`text-sm font-bold ${role === 'learner' ? 'text-blue-900' : 'text-gray-500'}`}>I'm a Learner</span>
+                                </button>
+                                <button 
+                                    onClick={() => setRole('creator')}
+                                    className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-2 ${role === 'creator' ? 'border-blue-600 bg-blue-50 shadow-sm' : 'border-gray-100 opacity-60 hover:opacity-100'}`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${role === 'creator' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                        <PenTool size={20} />
+                                    </div>
+                                    <span className={`text-sm font-bold ${role === 'creator' ? 'text-blue-900' : 'text-gray-500'}`}>I'm a Creator</span>
+                                </button>
+                            </div>
 
                             <form className="space-y-5" onSubmit={handleSignup}>
                                 {errorMessage && (
@@ -128,22 +166,25 @@ const Signup = () => {
                                         {errorMessage}
                                     </div>
                                 )}
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <label className="relative cursor-pointer">
-                                        <input type="radio" name="plan" className="peer hidden" checked={plan === 'basic'} onChange={() => setPlan('basic')} />
-                                        <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                            <p className="font-bold text-gray-900">Basic Trial</p>
-                                        </div>
-                                    </label>
-                                    <label className="relative cursor-pointer">
-                                        <input type="radio" name="plan" className="peer hidden" checked={plan === 'pro'} onChange={() => setPlan('pro')} />
-                                        <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                            <p className="font-bold text-gray-900">Pro Trial</p>
-                                        </div>
-                                    </label>
-                                </div>
+                                
+                                {role === 'creator' && (
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <label className="relative cursor-pointer">
+                                            <input type="radio" name="plan" className="peer hidden" checked={plan === 'basic'} onChange={() => setPlan('basic')} />
+                                            <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
+                                                <p className="font-bold text-gray-900 text-sm">Basic Trial</p>
+                                            </div>
+                                        </label>
+                                        <label className="relative cursor-pointer">
+                                            <input type="radio" name="plan" className="peer hidden" checked={plan === 'pro'} onChange={() => setPlan('pro')} />
+                                            <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
+                                                <p className="font-bold text-gray-900 text-sm">Pro Trial</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
@@ -165,7 +206,9 @@ const Signup = () => {
 
                                 <button type="submit" disabled={loading} className="w-full h-14 bg-gray-900 text-white rounded-xl font-bold shadow-xl shadow-gray-500/10 hover:bg-gray-800 transition-all flex items-center justify-center group relative overflow-hidden">
                                     {loading && <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10"><Loader2 className="animate-spin" /></div>}
-                                    <span className={loading ? 'opacity-0' : 'opacity-100'}>Start My 7-Day Free Trial</span>
+                                    <span className={loading ? 'opacity-0' : 'opacity-100'}>
+                                        {role === 'creator' ? 'Start My 7-Day Free Trial' : 'Join the Academy'}
+                                    </span>
                                     <ArrowRight size={18} className={`ml-3 group-hover:translate-x-1 transition-transform ${loading ? 'opacity-0' : 'opacity-100'}`} />
                                 </button>
                             </form>

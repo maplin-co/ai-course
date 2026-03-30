@@ -20,6 +20,7 @@ class UserCreate(UserBase):
     password: str
     full_name: Optional[str] = None
     plan: Optional[str] = 'basic'
+    role: Optional[str] = 'learner'
 
 class UserInDB(UserBase):
     hashed_password: str
@@ -28,6 +29,7 @@ class UserInDB(UserBase):
     is_verified: bool = False
     verification_token: Optional[str] = None
     plan: Optional[str] = 'basic'
+    role: Optional[str] = 'learner'
     subscription_status: Optional[str] = 'trial'
     trial_ends_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -39,6 +41,7 @@ class User(UserBase):
     disabled: Optional[bool] = False
     is_verified: bool = False
     plan: Optional[str] = 'basic'
+    role: Optional[str] = 'learner'
     subscription_status: Optional[str] = 'trial'
     trial_ends_at: Optional[datetime] = None
     
