@@ -38,11 +38,11 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center">
+            <a href="https://www.pohei.de" className="flex items-center">
               <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 LearnFlow
               </div>
-            </Link>
+            </a>
           </div>
 
           {/* Desktop Navigation */}
@@ -86,7 +86,7 @@ const Header = () => {
                     Sign in
                   </Button>
                 </Link>
-                <Link to="/checkout">
+                <Link to="/signup?role=creator">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                     Start free trial
                   </Button>
@@ -145,7 +145,7 @@ const Header = () => {
                         Sign in
                       </Button>
                     </Link>
-                    <Link to="/checkout" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link to="/signup?role=creator" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                         Start free trial
                       </Button>

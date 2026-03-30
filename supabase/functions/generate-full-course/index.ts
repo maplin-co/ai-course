@@ -22,7 +22,7 @@ serve(async (req) => {
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
     const prompt = `
-      Act as an elite Instructional Designer with expertise in assessment.
+      Act as an elite Instructional Designer with expertise in assessment and pedagogical content.
       Generate a comprehensive 'Full Course' for the topic: "${topic}".
       
       Response MUST be valid JSON with this exact schema:
@@ -32,13 +32,15 @@ serve(async (req) => {
         "modules": [
           {
             "moduleTitle": "string",
-            "lessons": ["lesson title 1", "lesson title 2", "lesson title 3"],
+            "lessons": [
+               { "title": "string", "content": "long-form high-quality educational text in Markdown format (at least 3 paragraphs with bullet points and code examples if relevant)" }
+            ],
             "quiz": [
               { 
                 "question": "string", 
-                "options": ["a", "b", "c", "d"], 
+                "options": ["option A", "option B", "option C", "option D"], 
                 "answer": 0, 
-                "explanation": "short corrective feedback explaining why the answer is correct" 
+                "explanation": "concise corrective feedback" 
               }
             ]
           }
@@ -48,6 +50,7 @@ serve(async (req) => {
       Requirements:
       - At least 5 modules.
       - Exactly 3 quiz questions per module.
+      - Each lesson MUST have substantive content worth reading (Reader View).
       - Return ONLY the JSON object.
     `;
 

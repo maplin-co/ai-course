@@ -8,22 +8,27 @@ import backend.sql_models  # Ensure models are registered
 import backend.course_model # Ensure course models are registered
 import backend.enrollment_model # Ensure enrollment models are registered
 from backend.routers import auth, resources, payments, courses, enrollments, media, ai
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
 
 # App init
 app = FastAPI()
 
 # CORS Architecture
-raw_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:8082,https://pohei.de,https://www.pohei.de,https://u723774100.pohei.de')
+# We pull from env but provide a comprehensive default for local development.
+raw_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:8080,http://localhost:8081,http://localhost:8082,https://pohei.de,https://www.pohei.de')
 origins = [origin.strip() for origin in raw_origins.split(',') if origin.strip()]
 
-# Credentials (cookies) are only allowed if we have explicit origins.
-allow_all = "*" in origins
-credentials_allowed = not allow_all
+# If no origins are found, we allow all in development to prevent blockers
+if not origins:
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=credentials_allowed,
+    allow_credentials=True if "*" not in origins else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

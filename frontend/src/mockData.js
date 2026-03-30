@@ -9,8 +9,8 @@ export const navigationLinks = [
 export const heroData = {
   title: "Create and launch your online course in 48 hours — no tech skills needed.",
   subtitle: "Built for coaches, trainers, and consultants who want to turn their knowledge into income fast.",
-  primaryCTA: "Get Early Access (Limited Spots)",
-  secondaryCTA: "Start Building Your Course Today",
+  primaryCTA: "Start Your 7-Day Free Trial",
+  secondaryCTA: "Join the Academy for Free",
   trustBadge: "Early access platform for course creators",
   backgroundImage: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwyfHxvbmxpbmUlMjBsZWFybmluZ3xlbnwwfHx8fDE3Njc5NzU4MDN8MA&ixlib=rb-4.1.0&q=85"
 };

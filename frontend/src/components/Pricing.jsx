@@ -123,7 +123,7 @@ const Pricing = () => {
 
               <CardFooter>
                 <Link 
-                  to={plan.cta === 'Contact sales' ? '/contact' : (localStorage.getItem('isLoggedIn') === 'true' ? '/courses' : '/signup')} 
+                  to={plan.cta === 'Contact sales' ? '/contact' : (localStorage.getItem('isLoggedIn') === 'true' ? '/dashboard' : '/signup?role=creator')} 
                   className="w-full"
                 >
                   <Button

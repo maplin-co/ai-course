@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle, Mail, ArrowRight, Loader2, GraduationCap, PenTool } from 'lucide-react';
 
 import API_BASE from '../api_config';
 
 const Signup = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Parse initial role from URL query (e.g., /signup?role=creator)
+    const queryParams = new URLSearchParams(location.search);
+    const initialRole = queryParams.get('role');
+    
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('learner');
+    const [role, setRole] = useState(initialRole === 'creator' ? 'creator' : 'learner');
     const [plan, setPlan] = useState('basic');
     const [loading, setLoading] = useState(false);
     const [isSignedUp, setIsSignedUp] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const navigate = useNavigate();
 
     const handleSignup = async (e) => {
         e.preventDefault();
