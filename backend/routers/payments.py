@@ -17,7 +17,16 @@ PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET", "")
 PAYPAL_MODE = os.getenv("PAYPAL_MODE", "sandbox")  # sandbox or live
 PAYPAL_API_BASE = f"https://api-m.{PAYPAL_MODE}.paypal.com" if PAYPAL_MODE == "sandbox" else "https://api-m.paypal.com"
 
+import xml.etree.ElementTree as ET
+from datetime import datetime
+
 router = APIRouter()
+
+# DPO Configuration
+DPO_COMPANY_TOKEN = os.getenv("DPO_COMPANY_TOKEN", "your_dpo_company_token_here")
+DPO_SERVICE_TYPE = os.getenv("DPO_SERVICE_TYPE", "3854")  # Standard service type
+DPO_API_URL = "https://secure.3gdirectpay.com/API/v6/"
+DPO_PAYMENT_URL = "https://secure.3gdirectpay.com/payv2.php?ID="
 
 # Pydantic Models
 class CheckoutSessionRequest(BaseModel):
@@ -50,6 +59,9 @@ class DPOPaymentRequest(BaseModel):
     customer_email: EmailStr
     customer_first_name: str
     customer_last_name: str
+    company_ref: Optional[str] = None
+    redirect_url: str
+    back_url: str
 
 # Helper Functions
 def get_paypal_access_token():
@@ -324,26 +336,84 @@ async def create_dpo_token(request: DPOPaymentRequest):
     Create a DPO Payment Token
     """
     try:
-        # In a real implementation, you would construct XML and POST to DPO API
-        # DPO_API_URL = "https://secure.3gdirectpay.com/API/v6/"
-        # xml_payload = f"..."
-        # response = requests.post(DPO_API_URL, data=xml_payload)
+        # Construct XML Payload for DPO API v6
+        company_token = DPO_COMPANY_TOKEN
+        service_type = DPO_SERVICE_TYPE
         
-        # MOCK IMPLEMENTATION (Simulating success)
-        import uuid
-        mock_trans_token = f"DPO-{uuid.uuid4()}"
-        mock_trans_ref = f"REF-{uuid.uuid4()}"
+        # Ensure currency for Botswana is supported
+        # Botswana Pula (BWP)
+        currency = request.currency.upper()
         
-        # In real DPO, you get a TransToken and a Reference
-        return {
-            "result": "000",
-            "resultExplanation": "Transaction Created",
-            "transToken": mock_trans_token,
-            "transRef": mock_trans_ref,
-            # For testing, we mock the payment page URL redirect
-            # In via real DPO: https://secure.3gdirectpay.com/payv2.php?ID={mock_trans_token}
-            "paymentUrl": f"https://secure.3gdirectpay.com/payv2.php?ID={mock_trans_token}"
-        }
+        # Current Date Time for ServiceDate
+        now = datetime.now().strftime("%Y/%m/%d %H:%M")
+        
+        xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
+<API3G>
+  <CompanyToken>{company_token}</CompanyToken>
+  <Request>createToken</Request>
+  <Transaction>
+    <PaymentAmount>{request.amount:.2f}</PaymentAmount>
+    <PaymentCurrency>{currency}</PaymentCurrency>
+    <CompanyRef>{request.company_ref or "Order-" + base64.b64encode(os.urandom(6)).decode()}</CompanyRef>
+    <RedirectURL>{request.redirect_url}</RedirectURL>
+    <BackURL>{request.back_url}</BackURL>
+    <CompanyRefContinuous>0</CompanyRefContinuous>
+    <TransactionApproval>0</TransactionApproval>
+  </Transaction>
+  <Services>
+    <Service>
+      <ServiceType>{service_type}</ServiceType>
+      <ServiceDescription>{request.service_description}</ServiceDescription>
+      <ServiceDate>{now}</ServiceDate>
+    </Service>
+  </Services>
+</API3G>"""
+
+        headers = {"Content-Type": "application/xml"}
+        
+        # In actual implementation: response = requests.post(DPO_API_URL, data=xml_payload, headers=headers)
+        # For this environment, if no keys exist, we provide a structured mock but log the payload
+        
+        if company_token == "your_dpo_company_token_here":
+            # LOGGING: payload created successfully
+            print(f"DEBUG: DPO XML Payload: {xml_payload}")
+            
+            # SIMULATING RESPONSE
+            import uuid
+            mock_trans_token = f"DPO-{uuid.uuid4()}"
+            mock_trans_ref = f"REF-{uuid.uuid4()}"
+            
+            return {
+                "result": "000",
+                "resultExplanation": "Transaction Created (Sandbox Mode)",
+                "transToken": mock_trans_token,
+                "transRef": mock_trans_ref,
+                "paymentUrl": f"{DPO_PAYMENT_URL}{mock_trans_token}",
+                "currency": currency,
+                "amount": request.amount
+            }
+
+        response = requests.post(DPO_API_URL, data=xml_payload, headers=headers)
+        
+        if response.status_code == 200:
+            root = ET.fromstring(response.text)
+            result = root.find("Result").text if root.find("Result") is not None else "Error"
+            result_explanation = root.find("ResultExplanation").text if root.find("ResultExplanation") is not None else "N/A"
+            trans_token = root.find("TransToken").text if root.find("TransToken") is not None else ""
+            trans_ref = root.find("TransRef").text if root.find("TransRef") is not None else ""
+            
+            if result == "000":
+                return {
+                    "result": result,
+                    "resultExplanation": result_explanation,
+                    "transToken": trans_token,
+                    "transRef": trans_ref,
+                    "paymentUrl": f"{DPO_PAYMENT_URL}{trans_token}"
+                }
+            else:
+                raise HTTPException(status_code=400, detail=f"DPO Error: {result_explanation} ({result})")
+        else:
+            raise HTTPException(status_code=500, detail=f"DPO API Connection Error: {response.status_code}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DPO Token Creation Failed: {str(e)}")
@@ -353,14 +423,46 @@ async def verify_dpo_token(trans_token: str):
     """
     Verify status of a DPO Transaction
     """
-    # Simply mocking a success response for the demo
-    return {
-        "result": "000",
-        "resultExplanation": "Transaction Paid",
-        "customerName": "Test User",
-        "amount": "99.00",
-        "currency": "USD"
-    }
+    try:
+        company_token = DPO_COMPANY_TOKEN
+        
+        xml_payload = f"""<?xml version="1.0" encoding="utf-8"?>
+<API3G>
+  <CompanyToken>{company_token}</CompanyToken>
+  <Request>verifyToken</Request>
+  <TransactionToken>{trans_token}</TransactionToken>
+</API3G>"""
+
+        headers = {"Content-Type": "application/xml"}
+        
+        if company_token == "your_dpo_company_token_here":
+            return {
+                "result": "000",
+                "resultExplanation": "Transaction Paid (Mock Success)",
+                "customerName": "Test User",
+                "amount": "0.00",
+                "currency": "BWP"
+            }
+
+        response = requests.post(DPO_API_URL, data=xml_payload, headers=headers)
+        
+        if response.status_code == 200:
+            root = ET.fromstring(response.text)
+            result = root.find("Result").text if root.find("Result") is not None else "Error"
+            result_explanation = root.find("ResultExplanation").text if root.find("ResultExplanation") is not None else ""
+            
+            return {
+                "result": result,
+                "resultExplanation": result_explanation,
+                "customerName": root.find("CustomerName").text if root.find("CustomerName") is not None else "N/A",
+                "amount": root.find("TransactionAmount").text if root.find("TransactionAmount") is not None else "0.00",
+                "currency": root.find("TransactionCurrency").text if root.find("TransactionCurrency") is not None else "N/A"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="DPO Verification Failed")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/payout-info")
 async def get_payout_information():
