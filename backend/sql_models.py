@@ -13,6 +13,9 @@ class SQLUser(Base):
     disabled = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     verification_token = Column(String, nullable=True)
+    plan = Column(String, default="basic")
+    subscription_status = Column(String, default="trial")
+    trial_ends_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class SQLResource(Base):

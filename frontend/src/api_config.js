@@ -4,6 +4,6 @@
  */
 
 export const API_BASE = (process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin)).replace(/\/$/, '');
+  (window.location.hostname === 'localhost' ? 'http://localhost:8082' : window.location.origin)).replace(/\/$/, '');
 
 export default API_BASE;

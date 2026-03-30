@@ -19,6 +19,8 @@ import Settings from "./pages/Settings";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import VerifyEmail from "./pages/VerifyEmail";
+import Courses from "./pages/Courses";
+import LearnerDashboard from "./pages/LearnerDashboard";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/learner-dashboard" element={<LearnerDashboard />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </HashRouter>

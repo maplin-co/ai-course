@@ -56,15 +56,23 @@ const Header = () => {
                 {link.name}
               </Link>
             ))}
+            <Link to="/courses" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium">
+              Courses
+            </Link>
           </nav>
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <>
+                <Link to="/learner-dashboard">
+                  <Button variant="ghost" className="text-blue-600 font-bold">
+                    Learner Portal
+                  </Button>
+                </Link>
                 <Link to="/dashboard">
                   <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-                    Dashboard
+                    Admin
                   </Button>
                 </Link>
                 <Button onClick={handleLogout} variant="outline" className="text-gray-700 hover:border-red-200 hover:text-red-600">
@@ -110,12 +118,20 @@ const Header = () => {
                   {link.name}
                 </Link>
               ))}
+              <Link to="/courses" className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium" onClick={() => setIsMobileMenuOpen(false)}>
+                Courses
+              </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t">
                 {isLoggedIn ? (
                   <>
+                    <Link to="/learner-dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full text-blue-600 border-blue-100 font-bold">
+                        Learner Portal
+                      </Button>
+                    </Link>
                     <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full text-gray-700">
-                        Dashboard
+                        Admin Dashboard
                       </Button>
                     </Link>
                     <Button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} variant="outline" className="w-full text-red-600 border-red-100">

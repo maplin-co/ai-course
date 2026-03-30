@@ -122,7 +122,10 @@ const Pricing = () => {
               </CardContent>
 
               <CardFooter>
-                <Link to={plan.cta === 'Contact sales' ? '/contact' : '/signup'} className="w-full">
+                <Link 
+                  to={plan.cta === 'Contact sales' ? '/contact' : (localStorage.getItem('isLoggedIn') === 'true' ? '/courses' : '/signup')} 
+                  className="w-full"
+                >
                   <Button
                     className={`w-full ${plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
@@ -140,8 +143,8 @@ const Pricing = () => {
 
         {/* Additional Info */}
         <div className="mt-12 text-center">
-          <p className="text-gray-600">
-            All plans include 7-day free trial • 0% Transaction Fees • Cancel anytime
+          <p className="text-gray-600 font-medium">
+            All plans include a <span className="text-blue-600 font-bold underline">7-day free trial</span> • 0% Transaction Fees • Cancel anytime
           </p>
         </div>
       </div>

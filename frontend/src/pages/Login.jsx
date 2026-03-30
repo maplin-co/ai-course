@@ -36,8 +36,9 @@ const Login = () => {
 
                 localStorage.setItem('userName', userRes.data.full_name || 'User');
                 localStorage.setItem('userEmail', userRes.data.email);
+                localStorage.setItem('userId', userRes.data.id);
 
-                navigate('/dashboard');
+                navigate('/learner-dashboard');
             }
         } catch (error) {
             console.error('Login error:', error);

@@ -8,7 +8,7 @@ from backend.models import UserCreate, User, Token
 from backend.security import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from backend.deps import get_current_user
 from backend.services.email import email_service
-from datetime import timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import secrets
 
@@ -33,12 +33,17 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
     hashed_password = get_password_hash(user.password)
     verification_token = secrets.token_urlsafe(32)
     
+    trial_days = 7
+    trial_expiry = datetime.now(timezone.utc) + timedelta(days=trial_days)
+    
     new_user = SQLUser(
         email=user.email,
         hashed_password=hashed_password,
         full_name=user.full_name,
         is_verified=False,
-        verification_token=verification_token
+        verification_token=verification_token,
+        plan=user.plan or 'basic',
+        trial_ends_at=trial_expiry
     )
     
     db.add(new_user)

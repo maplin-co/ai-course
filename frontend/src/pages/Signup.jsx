@@ -9,6 +9,7 @@ const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [plan, setPlan] = useState('basic');
     const [loading, setLoading] = useState(false);
     const [isSignedUp, setIsSignedUp] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -23,7 +24,8 @@ const Signup = () => {
             const response = await axios.post(`${API_BASE}/api/auth/signup`, {
                 email,
                 password,
-                full_name: name
+                full_name: name,
+                plan
             });
 
             if (response.status === 200 || response.status === 201) {
@@ -64,7 +66,7 @@ const Signup = () => {
                             <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-blue-400">✨</div>
                             <div>
                                 <p className="font-bold">No Credit Card Required</p>
-                                <p className="text-sm text-gray-500">Access full features for 30 days, on us.</p>
+                                <p className="text-sm text-gray-500">Access full features for 7 days, on us.</p>
                             </div>
                         </div>
                         <div className="flex items-start space-x-4">
@@ -128,14 +130,14 @@ const Signup = () => {
                                 )}
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <label className="relative cursor-pointer">
-                                        <input type="radio" name="plan" className="peer hidden" defaultChecked />
+                                        <input type="radio" name="plan" className="peer hidden" checked={plan === 'basic'} onChange={() => setPlan('basic')} />
                                         <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
                                             <p className="font-bold text-gray-900">Basic Trial</p>
                                         </div>
                                     </label>
                                     <label className="relative cursor-pointer">
-                                        <input type="radio" name="plan" className="peer hidden" />
+                                        <input type="radio" name="plan" className="peer hidden" checked={plan === 'pro'} onChange={() => setPlan('pro')} />
                                         <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
                                             <p className="font-bold text-gray-900">Pro Trial</p>

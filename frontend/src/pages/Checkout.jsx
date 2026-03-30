@@ -13,9 +13,9 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [currency, setCurrency] = useState('BWP');
     const [customerInfo, setCustomerInfo] = useState({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'student@example.com'
+        firstName: localStorage.getItem('userName')?.split(' ')[0] || 'John',
+        lastName: localStorage.getItem('userName')?.split(' ')[1] || 'Doe',
+        email: localStorage.getItem('userEmail') || 'student@example.com'
     });
 
     // In a real app, these would come from the previous page's state or cart
@@ -47,16 +47,25 @@ const Checkout = () => {
             const { result, paymentUrl, transToken, resultExplanation } = response.data;
 
             if (result === "000") {
-                // 2. Redirect to DPO Payment Page
-                // In production: window.location.href = paymentUrl;
+                // 2. Simulate Enrollment on Backend
+                try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        await axios.post(`${API_BASE}/api/enrollments/`, {
+                            user_id: localStorage.getItem('userId') || 'current',
+                            course_id: 1 // Example ID
+                        }, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                    }
+                } catch (e) { console.error("Auto-enrollment error:", e); }
 
-                // For this demo, we show a success message
-                alert(`${resultExplanation}\n\nRedirecting to DPO Secure Payment...\nCurrency: ${currency}\nAmount: ${course.price}\nToken: ${transToken}`);
+                // 3. Redirect
+                alert(`${resultExplanation}\n\nRedirecting to your Learner Portal...\nCurrency: ${currency}\nAmount: ${course.price}\nToken: ${transToken}`);
 
                 setTimeout(() => {
-                    navigate('/success');
+                    navigate('/learner-dashboard');
                 }, 2000);
-
             } else {
                 alert(`Payment creation failed: ${resultExplanation}`);
             }

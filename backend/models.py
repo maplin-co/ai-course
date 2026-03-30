@@ -19,6 +19,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     full_name: Optional[str] = None
+    plan: Optional[str] = 'basic'
 
 class UserInDB(UserBase):
     hashed_password: str
@@ -26,6 +27,9 @@ class UserInDB(UserBase):
     disabled: Optional[bool] = None
     is_verified: bool = False
     verification_token: Optional[str] = None
+    plan: Optional[str] = 'basic'
+    subscription_status: Optional[str] = 'trial'
+    trial_ends_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class User(UserBase):
@@ -34,6 +38,9 @@ class User(UserBase):
     full_name: Optional[str] = None
     disabled: Optional[bool] = False
     is_verified: bool = False
+    plan: Optional[str] = 'basic'
+    subscription_status: Optional[str] = 'trial'
+    trial_ends_at: Optional[datetime] = None
     
     # helper to convert from mongo dict
     @classmethod

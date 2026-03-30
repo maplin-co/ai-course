@@ -66,6 +66,18 @@ async def read_my_enrollments(
     """
     return await get_user_enrollments(db, current_user.id)
 
+@router.get("/check", response_model=Optional[Enrollment])
+async def check_enrollment(
+    course_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Check if the current user is enrolled in a specific course.
+    """
+    enrollment = await get_enrollment_by_course(db, current_user.id, course_id)
+    return enrollment
+
 @router.get("/{enrollment_id}", response_model=Enrollment)
 async def read_enrollment(
     enrollment_id: str, 
