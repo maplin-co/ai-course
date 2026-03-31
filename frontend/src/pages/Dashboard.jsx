@@ -115,7 +115,7 @@ const Dashboard = () => {
                             Your 7-day trial of LearnFlow has ended. Upgrade now to preserve your academy and continue scaling your business.
                         </p>
                         <div className="space-y-4">
-                            <Link to="/signup?role=creator" className="block w-full py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
+                            <Link to="/pricing" className="block w-full py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
                                 Upgrade Plan Now <ArrowRight size={20} />
                             </Link>
                             <button onClick={() => navigate('/login')} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900">Sign in to another account</button>

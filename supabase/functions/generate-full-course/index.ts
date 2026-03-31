@@ -11,15 +11,20 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { 
+      status: 200, 
+      headers: corsHeaders 
+    });
+  }
 
   try {
     const { topic, user_id } = await req.json();
     if (!topic || !user_id) throw new Error("Missing topic or user_id.");
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    // 🧠 Leveraging Gemini 3 Flash for advanced reasoning and quiz generation
-    const GEMINI_MODEL = "gemini-3-flash"; 
+    // 🧠 Leveraging Gemini 2.0 Flash for advanced reasoning
+    const GEMINI_MODEL = "gemini-2.0-flash"; 
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
     const prompt = `

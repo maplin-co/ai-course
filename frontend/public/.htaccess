@@ -48,8 +48,8 @@
   # Referrer policy
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   
-  # Content Security Policy
-  Header always set Content-Security-Policy "default-src 'self' * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' * data: blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' * 'unsafe-inline'; img-src 'self' * data: blob:; connect-src 'self' * ws: wss:; frame-src 'self' *; font-src 'self' * data:;"
+  # Content Security Policy - Hardened but Permissive for Stripe/PostHog
+  Header always set Content-Security-Policy "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data: blob:; connect-src 'self' https: wss:; frame-src 'self' https:; font-src 'self' https: data:; worker-src 'self' blob:;"
 </IfModule>
 
 # Disable directory browsing

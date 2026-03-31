@@ -6,73 +6,71 @@ import { Check, Zap } from 'lucide-react';
 
 const pricingPlans = [
   {
-    id: 1,
-    name: 'Basic',
-    price: '$49',
-    period: '/month',
-    description: 'Perfect for getting started with your first course',
+    id: 'basic',
+    name: 'Starter Trial',
+    price: '$0',
+    period: '/7 days',
+    description: 'Perfect for exploring the platform before launching',
     features: [
-      'Unlimited courses',
-      'Up to 100 students',
+      'Unlimited course drafts',
+      'AI-powered builder demo',
       'Basic analytics',
-      'Email support',
-      'Custom domain',
-      'Basic course builder'
+      'Community access',
+      '7-day creator tools activation'
     ],
-    cta: 'Get Early Access',
+    cta: 'Start Free Trial',
     popular: false
   },
   {
-    id: 2,
-    name: 'Pro',
-    price: '$99',
+    id: 'standard',
+    name: 'Pro Creator',
+    price: '$49',
     period: '/month',
-    description: 'Best for growing your practice',
+    description: 'Launch your academy with full power',
     features: [
-      'Everything in Basic',
+      'Everything in Trial',
       'Unlimited students',
-      'Advanced analytics',
-      'Priority support',
+      'Advanced AI course generation',
       'Custom branding',
-      'AI-powered tools',
-      'Memberships & communities',
-      'Advanced selling features'
+      'DPO Payment integration',
+      'Priority email support'
     ],
-    cta: 'Get Early Access',
+    cta: 'Get Started Pro',
     popular: true
   },
   {
-    id: 3,
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'For large organizations and teams',
+    id: 'premium',
+    name: 'Elite Scaling',
+    price: '$99',
+    period: '/month',
+    description: 'For high-volume creators and teams',
     features: [
       'Everything in Pro',
-      'Dedicated account manager',
-      '24/7 phone support',
-      'Custom integrations',
-      'API access',
-      'Advanced security',
-      'SLA guarantee',
-      'Onboarding support'
+      'Dedicated success manager',
+      'Advanced API access',
+      'White-label options',
+      'Premium AI generation limits',
+      'Strategy consulting'
     ],
-    cta: 'Contact sales',
+    cta: 'Scale Now',
     popular: false
   }
 ];
 
 const Pricing = () => {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userId = localStorage.getItem('userId');
+
   return (
     <section id="pricing" className="py-20 bg-gradient-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Simple, transparent pricing
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tighter">
+            Choose Your Growth Path
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the perfect plan for your knowledge business. All plans include 48-hour launch support.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+            Join 35,000+ creators scaling their knowledge with LearnFlow AI.
           </p>
         </div>
 
@@ -81,54 +79,54 @@ const Pricing = () => {
           {pricingPlans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative overflow-hidden transition-all duration-300 ${plan.popular
+              className={`relative overflow-hidden transition-all duration-300 rounded-[2.5rem] ${plan.popular
                 ? 'border-2 border-blue-600 shadow-2xl scale-105 md:scale-110'
                 : 'border border-gray-200 hover:shadow-xl hover:scale-105'
                 }`}
             >
               {plan.popular && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-bl-lg flex items-center gap-1">
+                <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-black px-4 py-2 rounded-bl-xl flex items-center gap-1 uppercase tracking-widest italic">
                   <Zap size={14} fill="currentColor" />
-                  MOST POPULAR
+                  Most Popular
                 </div>
               )}
 
-              <CardHeader className="text-center pb-8 pt-8">
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+              <CardHeader className="text-center pb-8 pt-10">
+                <CardTitle className="text-2xl font-black text-gray-900 mb-2 italic uppercase tracking-tighter">
                   {plan.name}
                 </CardTitle>
                 <div className="mb-4">
-                  <span className="text-4xl md:text-5xl font-bold text-gray-900">
+                  <span className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">
                     {plan.price}
                   </span>
-                  <span className="text-gray-600">{plan.period}</span>
+                  <span className="text-gray-500 font-bold uppercase text-xs tracking-widest ml-1">{plan.period}</span>
                 </div>
-                <CardDescription className="text-base">
+                <CardDescription className="text-xs font-medium italic">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="pb-8">
-                <ul className="space-y-3">
+              <CardContent className="pb-8 px-8">
+                <ul className="space-y-4">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                        <Check className="text-green-600" size={14} />
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 bg-blue-50 rounded-full flex items-center justify-center mt-0.5 border border-blue-100">
+                        <Check className="text-blue-600" size={12} />
                       </div>
-                      <span className="text-gray-700 text-sm">{feature}</span>
+                      <span className="text-gray-600 text-[11px] font-medium leading-relaxed">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="px-8 pb-10">
                 <Link 
-                  to={plan.cta === 'Contact sales' ? '/contact' : (localStorage.getItem('isLoggedIn') === 'true' ? '/dashboard' : '/signup?role=creator')} 
+                  to={plan.id === 'basic' ? (!isLoggedIn ? '/signup?role=creator&plan=basic' : '/dashboard') : (isLoggedIn ? `/checkout?plan=${plan.id}&user_id=${userId}` : `/signup?role=creator&plan=${plan.id}`)} 
                   className="w-full"
                 >
                   <Button
-                    className={`w-full ${plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                    className={`w-full h-14 rounded-2xl font-black text-sm tracking-widest uppercase transition-all ${plan.popular
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200'
                       : 'bg-gray-900 hover:bg-gray-800 text-white'
                       }`}
                     size="lg"

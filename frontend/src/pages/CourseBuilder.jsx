@@ -191,9 +191,22 @@ const CourseBuilder = () => {
     useEffect(() => {
         const checkAuth = async () => {
             const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'learner';
+
             if (!user) {
                 navigate('/login');
                 return;
+            }
+
+            if (role !== 'creator') {
+                navigate('/learner-dashboard');
+                return;
+            }
+
+            // Check trial status
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (profile?.plan === 'basic' && new Date() > new Date(profile.trial_ends_at)) {
+                navigate('/dashboard');
             }
         };
         checkAuth();

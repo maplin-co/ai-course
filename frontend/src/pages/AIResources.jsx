@@ -12,6 +12,25 @@ const AIResources = () => {
     const [toolInput, setToolInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [toolResult, setToolResult] = useState(null);
+    const navigate = useNavigate();
+
+    React.useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'learner';
+
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+
+            if (role !== 'creator') {
+                navigate('/learner-dashboard');
+                return;
+            }
+        };
+        checkAuth();
+    }, [navigate]);
 
     const aiTools = [
         {

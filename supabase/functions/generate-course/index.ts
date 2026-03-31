@@ -13,7 +13,12 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { 
+      status: 200, 
+      headers: corsHeaders 
+    });
+  }
 
   try {
     const { topic, user_id } = await req.json();
