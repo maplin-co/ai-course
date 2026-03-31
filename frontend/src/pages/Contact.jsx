@@ -36,7 +36,7 @@ const Contact = () => {
                                 <div>
                                     <h4 className="font-bold text-lg mb-1">Email us</h4>
                                     <p className="text-gray-600 mb-2">Our friendly team is here to help.</p>
-                                    <a href="mailto:support@learnflow.ai" className="text-blue-600 font-bold hover:underline">support@learnflow.ai</a>
+                                    <a href="mailto:support@learnflow.ai" className="text-blue-600 font-bold hover:underline">support@pohei.de</a>
                                 </div>
                             </div>
 
@@ -47,7 +47,6 @@ const Contact = () => {
                                 <div>
                                     <h4 className="font-bold text-lg mb-1">Global Support</h4>
                                     <p className="text-gray-600 mb-2">24/7 support for all enterprise customers.</p>
-                                    <p className="text-gray-900 font-medium">Available in over 40 languages.</p>
                                 </div>
                             </div>
 
@@ -58,7 +57,7 @@ const Contact = () => {
                                 <div>
                                     <h4 className="font-bold text-lg mb-1">Visit our HQ</h4>
                                     <p className="text-gray-600 mb-2">Come say hello at our main office.</p>
-                                    <p className="text-gray-900 font-medium">123 Learning Lane, EdTech Valley, CA 94043</p>
+                                    <p className="text-gray-900 font-medium">Plot 57212 G.North Gaborone, Botswana</p>
                                 </div>
                             </div>
                         </div>
