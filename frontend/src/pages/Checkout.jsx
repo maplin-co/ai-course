@@ -3,9 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { ShieldCheck, Lock, CreditCard, Loader2, ArrowRight, CheckCircle, Award, Sparkles } from 'lucide-react';
-import axios from 'axios';
-
-import API_BASE from '../api_config';
+import { supabase } from '../supabase';
 
 const Checkout = () => {
     const location = useLocation();
@@ -31,8 +29,14 @@ const Checkout = () => {
                 return;
             }
             try {
-                const res = await axios.get(`${API_BASE}/api/courses/${courseId}`);
-                setCourseData(res.data);
+                const { data, error } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('id', courseId)
+                    .single();
+                
+                if (error) throw error;
+                setCourseData(data);
             } catch (err) {
                 console.error("Fetch course error:", err);
                 // Fallback demo
@@ -55,37 +59,43 @@ const Checkout = () => {
         const finalPrice = computePrice();
         
         try {
-            // 1. Create DPO Token
-            const response = await axios.post(`${API_BASE}/api/payments/dpo/create-token`, {
-                amount: finalPrice,
-                currency: currency,
-                service_description: type === 'certificate' ? `Certificate Collection: ${courseData?.title}` : `Subscription: ${courseData?.title}`,
-                customer_email: customerInfo.email,
-                customer_first_name: customerInfo.firstName,
-                customer_last_name: customerInfo.lastName,
-                redirect_url: `${window.location.origin}/success`,
-                back_url: `${window.location.origin}/checkout`
+            // 1. Create DPO Token via Supabase Edge Function
+            const { data: functionData, error: functionError } = await supabase.functions.invoke('dpo-payment', {
+                body: {
+                    amount: finalPrice,
+                    currency: currency,
+                    service_description: type === 'certificate' ? `Certificate Collection: ${courseData?.title}` : `Subscription: ${courseData?.title}`,
+                    customer_email: customerInfo.email,
+                    customer_first_name: customerInfo.firstName,
+                    customer_last_name: customerInfo.lastName,
+                    redirect_url: `${window.location.origin}/success`,
+                    back_url: `${window.location.origin}/checkout`
+                }
             });
 
-            const { result, paymentUrl, transToken, resultExplanation } = response.data;
+            if (functionError) throw functionError;
+
+            const { result, paymentUrl, transToken, resultExplanation } = functionData;
 
             if (result === "000") {
-                // 2. Perform Post-Payment Backend Action
-                const token = localStorage.getItem('token');
-                if (token && courseId) {
+                // 2. Perform Post-Payment Action in Supabase
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user && courseId) {
                     if (type === 'certificate') {
-                        // Mark Certificate as Paid
-                        await axios.post(`${API_BASE}/api/enrollments/pay-certificate?course_id=${courseId}`, {}, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
+                        // Mark Certificate as Paid in enrollments table
+                        await supabase
+                            .from('enrollments')
+                            .update({ is_paid: true })
+                            .eq('user_id', user.id)
+                            .eq('course_id', courseId);
                     } else {
                         // Regular Enrollment
-                        await axios.post(`${API_BASE}/api/enrollments/`, {
-                            user_id: localStorage.getItem('userId') || 'current',
-                            course_id: parseInt(courseId)
-                        }, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
+                        await supabase
+                            .from('enrollments')
+                            .upsert({
+                                user_id: user.id,
+                                course_id: courseId
+                            });
                     }
                 }
 
@@ -97,7 +107,7 @@ const Checkout = () => {
             }
         } catch (error) {
             console.error("Payment Error:", error);
-            alert("Failed to initiate payment. " + (error.response?.data?.detail || ""));
+            alert("Failed to initiate payment: " + error.message);
         } finally {
             setLoading(false);
         }

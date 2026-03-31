@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Brain, Sparkles, Wand2, MessageSquare, Layout, Globe, Zap, Shield, Cpu, Users, X, Send, Loader2 } from 'lucide-react';
-
-import API_BASE from '../api_config';
-import { supabase } from '../supabase';
 
 const AIResources = () => {
     const [selectedTool, setSelectedTool] = useState(null);

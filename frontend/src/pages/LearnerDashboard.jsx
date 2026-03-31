@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { BookOpen, GraduationCap, Clock, CheckCircle, ChevronRight, Layout, Play, Lock, AlertCircle, Award, CreditCard, Sparkles } from 'lucide-react';
-import API_BASE from '../api_config';
 
 const LearnerDashboard = () => {
     const [user, setUser] = useState(null);
@@ -15,19 +14,33 @@ const LearnerDashboard = () => {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-
             try {
-                // Fetch User Profile
-                const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUser(userRes.data);
+                // Get Current User from Supabase
+                const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
+                if (userError || !authUser) {
+                    setLoading(false);
+                    return;
+                }
+
+                // Fetch Profile Metadata
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', authUser.id)
+                    .single();
+                
+                if (profileError) throw profileError;
+                
+                // Merge auth data and profile data
+                const userData = {
+                    ...authUser,
+                    ...profile
+                };
+                setUser(userData);
 
                 // Check Trial Status (Creators only)
-                if (userRes.data.role === 'creator' && userRes.data.trial_ends_at) {
-                    const expiry = new Date(userRes.data.trial_ends_at);
+                if (userData.role === 'creator' && userData.trial_ends_at) {
+                    const expiry = new Date(userData.trial_ends_at);
                     const now = new Date();
                     const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
                     setTrialStatus({
@@ -37,11 +50,22 @@ const LearnerDashboard = () => {
                     });
                 }
 
-                // Fetch Enrollments
-                const enrollRes = await axios.get(`${API_BASE}/api/enrollments/`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setEnrollments(enrollRes.data);
+                // Fetch Enrollments from Supabase
+                const { data: enrollRes, error: enrollError } = await supabase
+                    .from('enrollments')
+                    .select('*, courses(*)')
+                    .eq('user_id', authUser.id);
+                
+                if (enrollError) throw enrollError;
+                
+                // Map the data to match expected format
+                const mappedEnrollments = (enrollRes || []).map(enr => ({
+                    ...enr,
+                    title: enr.courses?.title || 'Untitled Course',
+                    course_id: enr.courses?.id
+                }));
+                
+                setEnrollments(mappedEnrollments);
 
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);

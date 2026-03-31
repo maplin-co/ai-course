@@ -18,8 +18,6 @@ import {
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../supabase';
-import API_BASE from '../api_config';
-import axios from 'axios';
 import confetti from 'canvas-confetti';
 
 const CourseViewer = () => {

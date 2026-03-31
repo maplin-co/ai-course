@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 import { ArrowRight, Loader2 } from 'lucide-react';
-
-import API_BASE from '../api_config';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -19,30 +17,27 @@ const Login = () => {
         setError('');
 
         try {
-            const formData = new FormData();
-            formData.append('username', email);
-            formData.append('password', password);
+            const { data, error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-            const response = await axios.post(`${API_BASE}/api/auth/token`, formData);
+            if (signInError) throw signInError;
 
-            if (response.data.access_token) {
-                localStorage.setItem('token', response.data.access_token);
+            if (data?.session) {
+                const user = data.user;
+                localStorage.setItem('token', data.session.access_token);
                 localStorage.setItem('isLoggedIn', 'true');
-
-                // Get user info
-                const userRes = await axios.get(`${API_BASE}/api/auth/me`, {
-                    headers: { Authorization: `Bearer ${response.data.access_token}` }
-                });
-
-                localStorage.setItem('userName', userRes.data.full_name || 'User');
-                localStorage.setItem('userEmail', userRes.data.email);
-                localStorage.setItem('userId', userRes.data.id);
+                localStorage.setItem('userName', user.user_metadata?.full_name || 'User');
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userId', user.id);
+                localStorage.setItem('userRole', user.user_metadata?.role || 'learner');
 
                 navigate('/learner-dashboard');
             }
         } catch (error) {
             console.error('Login error:', error);
-            setError(error.response?.data?.detail || 'Invalid email or password.');
+            setError(error.message || 'Invalid email or password.');
         } finally {
             setLoading(false);
         }

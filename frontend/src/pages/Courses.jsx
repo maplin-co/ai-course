@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { BookOpen, Clock, Users, ArrowRight, Star, Search, Filter, PlayCircle, ShieldCheck, Loader2 } from 'lucide-react';
-const API_BASE = 'http://localhost:8082';
-// import API_BASE from '../api_config';
 
 const Courses = () => {
     const [courses, setCourses] = useState([]);
@@ -19,16 +17,27 @@ const Courses = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const response = await axios.get(`${API_BASE}/api/courses/`);
-                setCourses(response.data);
+                // Fetch public courses from Supabase
+                const { data, error } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('status', 'published')
+                    .eq('is_public', true);
+                
+                if (error) throw error;
+                setCourses(data || []);
 
                 // Fetch enrollments if logged in
-                const token = localStorage.getItem('token');
-                if (token) {
-                    const enrRes = await axios.get(`${API_BASE}/api/enrollments/`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    setEnrollments(enrRes.data.map(e => e.course_id));
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: enrRes, error: enrError } = await supabase
+                        .from('enrollments')
+                        .select('course_id')
+                        .eq('user_id', user.id);
+                    
+                    if (!enrError) {
+                        setEnrollments(enrRes.map(e => e.course_id));
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching courses:', error);
@@ -47,23 +56,26 @@ const Courses = () => {
     }, []);
 
     const handleFreeEnroll = async (courseId) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/signup');
-            return;
-        }
-
-        setEnrollingId(courseId);
         try {
-            await axios.post(`${API_BASE}/api/enrollments/`, {
-                course_id: courseId
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                navigate('/signup');
+                return;
+            }
+
+            setEnrollingId(courseId);
+            const { error } = await supabase
+                .from('enrollments')
+                .insert({
+                    course_id: courseId,
+                    user_id: user.id
+                });
+
+            if (error) throw error;
             navigate('/learner-dashboard');
         } catch (error) {
             console.error('Enrollment error:', error);
-            alert('Failed to start course. Please try again.');
+            alert('Failed to start course: ' + (error.message || 'Please try again.'));
         } finally {
             setEnrollingId(null);
         }

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 import { CheckCircle, Mail, ArrowRight, Loader2, GraduationCap, PenTool } from 'lucide-react';
-
-const API_BASE = 'http://localhost:8082';
-// import API_BASE from '../api_config';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -23,28 +20,32 @@ const Signup = () => {
     const [isSignedUp, setIsSignedUp] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    console.log('[DEBUG] API_BASE in Signup.jsx:', API_BASE);
-
     const handleSignup = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrorMessage('');
 
         try {
-            const response = await axios.post(`${API_BASE}/api/auth/signup`, {
+            const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                full_name: name,
-                plan: role === 'creator' ? plan : 'basic',
-                role
+                options: {
+                    data: {
+                        full_name: name,
+                        role: role,
+                        plan: role === 'creator' ? plan : 'basic',
+                    }
+                }
             });
 
-            if (response.status === 200 || response.status === 201) {
+            if (error) throw error;
+
+            if (data?.user) {
                 setIsSignedUp(true);
             }
         } catch (error) {
             console.error('Signup error:', error);
-            setErrorMessage(error.response?.data?.detail || 'Signup failed. Please try again.');
+            setErrorMessage(error.message || 'Signup failed. Please try again.');
         } finally {
             setLoading(false);
         }

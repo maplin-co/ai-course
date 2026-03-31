@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import {
@@ -22,9 +22,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, GripVertical, Plus, X, Loader2 } from 'lucide-react';
-
-import API_BASE from '../api_config';
-import { supabase } from '../supabase';
 
 // Sidebar Item Component (Draggable)
 const SidebarItem = ({ type, icon, label }) => {
@@ -134,27 +131,29 @@ const SortableModule = ({ id, module, onDelete, onRemoveContent, onUpdateModule,
                                                     type="file"
                                                     className="hidden"
                                                     accept={item.type === 'video' ? "video/*" : ".pdf,.doc,.docx"}
-                                                    onChange={(e) => {
+                                                    onChange={async (e) => {
                                                         const file = e.target.files[0];
                                                         if (file) {
-                                                            // In a real app, upload usage:
-                                                            const formData = new FormData();
-                                                            formData.append('file', file);
+                                                            try {
+                                                                const fileExt = file.name.split('.').pop();
+                                                                const fileName = `${Math.random()}.${fileExt}`;
+                                                                const filePath = `${localStorage.getItem('userId') || 'guest'}/${fileName}`;
 
-                                                            // Optimistic update
-                                                            // onUpdateContent(module.id, idx, "Uploading...");
+                                                                const { error: uploadError, data } = await supabase.storage
+                                                                    .from('media')
+                                                                    .upload(filePath, file);
 
-                                                            axios.post(`${API_BASE}/api/media/upload`, formData, {
-                                                                headers: {
-                                                                    'Content-Type': 'multipart/form-data',
-                                                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                                                                }
-                                                            }).then(res => {
-                                                                onUpdateContent(module.id, idx, res.data.url, "url");
-                                                            }).catch(err => {
+                                                                if (uploadError) throw uploadError;
+
+                                                                const { data: { publicUrl } } = supabase.storage
+                                                                    .from('media')
+                                                                    .getPublicUrl(filePath);
+
+                                                                onUpdateContent(module.id, idx, publicUrl, "url");
+                                                            } catch (err) {
                                                                 console.error("Upload failed", err);
-                                                                alert("Upload failed. Make sure you are logged in.");
-                                                            });
+                                                                alert("Upload failed: " + err.message);
+                                                            }
                                                         }
                                                     }}
                                                 />
@@ -190,22 +189,42 @@ const CourseBuilder = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        if (!loggedIn) {
-            navigate('/login');
-            return;
-        }
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+        };
+        checkAuth();
 
         // If editing an existing course
         if (id) {
-            const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
-            const courseToEdit = localCourses.find(c => c.id === id);
-            if (courseToEdit) {
-                setCourseTitle(courseToEdit.title);
-                setCourseDescription(courseToEdit.description);
-                setModules(courseToEdit.modules);
-                setFinalExam(courseToEdit.finalExam || []);
-            }
+            const fetchCourse = async () => {
+                const { data, error } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (data) {
+                    setCourseTitle(data.title);
+                    setCourseDescription(data.description);
+                    setModules(data.content?.modules || []);
+                    setFinalExam(data.content?.finalExam || []);
+                } else {
+                    // Fallback to localStorage for migration period
+                    const localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+                    const courseToEdit = localCourses.find(c => c.id === id);
+                    if (courseToEdit) {
+                        setCourseTitle(courseToEdit.title);
+                        setCourseDescription(courseToEdit.description);
+                        setModules(courseToEdit.modules);
+                        setFinalExam(courseToEdit.finalExam || []);
+                    }
+                }
+            };
+            fetchCourse();
         }
     }, [id, navigate]);
 
@@ -320,41 +339,49 @@ const CourseBuilder = () => {
 
     const handleSaveCourse = async () => {
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Authentication required");
+
             const courseData = {
-                id: id || `course-${Date.now()}`,
+                user_id: user.id,
                 title: courseTitle,
                 description: courseDescription,
-                modules: modules,
-                finalExam: finalExam, // Save final exam
-                updatedAt: new Date().toISOString()
+                content: {
+                    modules: modules,
+                    finalExam: finalExam
+                },
+                updated_at: new Date().toISOString()
             };
 
-            // 1. Try to save to API
-            try {
-                await axios.post(`${API_BASE}/api/courses/`, courseData);
-            } catch (apiError) {
-                console.warn("API Save failed, falling back to LocalStorage only:", apiError);
+            if (id && !id.startsWith('course-')) {
+                courseData.id = id;
             }
 
-            // 2. Save to LocalStorage
+            // 1. Save to Supabase
+            const { data, error } = await supabase
+                .from('courses')
+                .upsert(courseData)
+                .select();
+
+            if (error) throw error;
+
+            // 2. Save to LocalStorage (as backup/sync)
             let localCourses = JSON.parse(localStorage.getItem('createdCourses') || '[]');
+            const savedCourse = data[0];
 
             if (id) {
-                // Update existing
-                localCourses = localCourses.map(c => c.id === id ? courseData : c);
+                localCourses = localCourses.map(c => c.id === id ? savedCourse : c);
             } else {
-                // Add new
-                courseData.createdAt = new Date().toISOString();
-                localCourses.unshift(courseData);
+                localCourses.unshift(savedCourse);
             }
 
             localStorage.setItem('createdCourses', JSON.stringify(localCourses));
 
-            alert(id ? "Course Updated Successfully!" : "Course Saved Successfully!");
+            alert("Course Saved Successfully!");
             navigate('/dashboard');
         } catch (error) {
             console.error("Error saving course:", error);
-            alert("Failed to save course. Please try again.");
+            alert("Failed to save course: " + error.message);
         }
     };
 
@@ -369,30 +396,23 @@ const CourseBuilder = () => {
             const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-full-course', {
                 body: { 
                     topic: courseTitle, 
-                    user_id: localStorage.getItem('userId') || 'guest_user' 
+                    user_id: (await supabase.auth.getUser()).data.user?.id || 'guest_user' 
                 }
             });
 
             if (functionError) throw functionError;
             
-            // The Edge Function returns { success: true, course: { content: { ... } } }
             const generatedData = functionData.course.content;
-            console.log("DEBUG: AI Raw Response Body (Edge Function):", generatedData);
 
             if (!generatedData || !generatedData.modules || !Array.isArray(generatedData.modules)) {
-                let dataSnippet = JSON.stringify(generatedData).substring(0, 200);
-                if (typeof generatedData === 'string' && generatedData.startsWith('<!DOCTYPE')) {
-                    dataSnippet = "HTML detected (probably a 404 or Hostinger error page). Check your backend URL.";
-                }
-                throw new Error(`AI response was missing modules. Type: ${typeof generatedData}, Data: ${dataSnippet}`);
+                throw new Error("AI response was missing modules.");
             }
 
-            // Map generated modules to ensure they have unique IDs for the builder
             const newModules = generatedData.modules.map((m, index) => ({
                 id: `gen-${Date.now()}-${index}`,
                 title: m.title || "Untitled Module",
                 content: m.content || [],
-                quiz: m.quiz || [] // Keep the quiz data
+                quiz: m.quiz || []
             }));
 
             setModules(prev => [...prev, ...newModules]);
@@ -404,18 +424,7 @@ const CourseBuilder = () => {
             }
         } catch (error) {
             console.error("AI Generation Failed:", error);
-            const targetUrl = `${API_BASE}/api/ai/generate-course`;
-            let msg = "Failed to generate content.";
-
-            if (error.response) {
-                msg = error.response.data.detail || `Server Error: ${error.response.status} ${error.response.statusText}`;
-            } else if (error.request) {
-                msg = `No response at ${targetUrl}. Possible Connection/CORS/Timeout issue.`;
-            } else {
-                msg = error.message;
-            }
-
-            alert(`Debug: ${msg}`);
+            alert(`Error: ${error.message}`);
         } finally {
             setIsGenerating(false);
         }

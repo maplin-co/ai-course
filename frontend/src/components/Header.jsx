@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../supabase';
 import { navigationLinks } from '../mockData';
 import { Button } from './ui/button';
 import { Menu, X } from 'lucide-react';
@@ -14,11 +15,16 @@ const Header = () => {
     setIsLoggedIn(loggedIn);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
     setIsLoggedIn(false);
+    window.location.href = '/'; 
   };
 
   useEffect(() => {

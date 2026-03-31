@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import { CheckCircle, XCircle, Loader2, ArrowRight } from 'lucide-react';
-
-import API_BASE from '../api_config';
+import { supabase } from '../supabase';
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
@@ -13,19 +11,36 @@ const VerifyEmail = () => {
 
     useEffect(() => {
         const verify = async () => {
-            if (!token) {
-                setStatus('error');
-                setMessage('Missing verification token.');
-                return;
-            }
-
-            try {
-                const response = await axios.get(`${API_BASE}/api/auth/verify-email?token=${token}`);
+            // Supabase usually handles verification via a redirect link that sets the session.
+            // We'll check if the user is now authenticated.
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (session) {
                 setStatus('success');
-                setMessage(response.data.message);
-            } catch (error) {
+                setMessage('Your email has been successfully verified! You are now logged in.');
+            } else if (error) {
                 setStatus('error');
-                setMessage(error.response?.data?.detail || 'Verification failed. The link may be expired.');
+                setMessage(error.message);
+            } else {
+                // If no session yet, wait for state change or show error if token is missing
+                if (!token) {
+                    setStatus('error');
+                    setMessage('Missing verification token.');
+                } else {
+                    // Try verifying with the token if it's a magic link / OTP
+                    const { error: verifyError } = await supabase.auth.verifyOtp({
+                        token_hash: token,
+                        type: 'signup',
+                    });
+
+                    if (verifyError) {
+                        setStatus('error');
+                        setMessage(verifyError.message);
+                    } else {
+                        setStatus('success');
+                        setMessage('Your email has been successfully verified!');
+                    }
+                }
             }
         };
 
