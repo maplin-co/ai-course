@@ -3,7 +3,7 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
-import { BarChart3, BookOpen, Globe, Users, Plus, ArrowRight } from 'lucide-react';
+import { BarChart3, BookOpen, Globe, Users, Plus, ArrowRight, Sparkles } from 'lucide-react';
 
 import API_BASE from '../api_config';
 import { supabase } from '../supabase';
