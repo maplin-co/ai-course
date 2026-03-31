@@ -11,36 +11,51 @@ const VerifyEmail = () => {
 
     useEffect(() => {
         const verify = async () => {
-            // Supabase usually handles verification via a redirect link that sets the session.
-            // We'll check if the user is now authenticated.
             const { data: { session }, error } = await supabase.auth.getSession();
             
             if (session) {
                 setStatus('success');
                 setMessage('Your email has been successfully verified! You are now logged in.');
+                
+                const channel = supabase.channel(`signup-confirm:${session.user.email}`);
+                channel.subscribe((st) => {
+                    if (st === 'SUBSCRIBED') {
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'confirmed',
+                            payload: { confirmed: true, email: session.user.email }
+                        });
+                        console.log("Broadcast sent for", session.user.email);
+                    }
+                });
             } else if (error) {
                 setStatus('error');
                 setMessage(error.message);
-            } else {
-                // If no session yet, wait for state change or show error if token is missing
-                if (!token) {
-                    setStatus('error');
-                    setMessage('Missing verification token.');
-                } else {
-                    // Try verifying with the token if it's a magic link / OTP
-                    const { error: verifyError } = await supabase.auth.verifyOtp({
-                        token_hash: token,
-                        type: 'signup',
-                    });
+            } else if (token) {
+                const { error: verifyError } = await supabase.auth.verifyOtp({
+                    token_hash: token,
+                    type: 'signup',
+                });
 
-                    if (verifyError) {
-                        setStatus('error');
-                        setMessage(verifyError.message);
-                    } else {
+                if (verifyError) {
+                    setStatus('error');
+                    setMessage(verifyError.message);
+                } else {
+                    const { data: { session: s } } = await supabase.auth.getSession();
+                    if (s) {
                         setStatus('success');
-                        setMessage('Your email has been successfully verified!');
+                        setMessage('Your email has been successfully verified! You are now logged in.');
+                        const channel = supabase.channel(`signup-confirm:${s.user.email}`);
+                        channel.subscribe((st) => {
+                            if (st === 'SUBSCRIBED') {
+                                channel.send({ type: 'broadcast', event: 'confirmed' });
+                            }
+                        });
                     }
                 }
+            } else {
+                setStatus('error');
+                setMessage('Missing verification token or session.');
             }
         };
 

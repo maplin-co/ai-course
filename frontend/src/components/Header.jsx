@@ -9,10 +9,13 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('learner');
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
+    const role = localStorage.getItem('userRole') || 'learner';
+    setUserRole(role);
   }, []);
 
   const handleLogout = async () => {
@@ -71,16 +74,19 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <>
-                <Link to="/learner-dashboard">
-                  <Button variant="ghost" className="text-blue-600 font-bold">
-                    Learner Portal
-                  </Button>
-                </Link>
-                <Link to="/dashboard">
-                  <Button variant="ghost" className="text-gray-700 hover:text-blue-600">
-                    Admin
-                  </Button>
-                </Link>
+                {userRole === 'creator' ? (
+                  <Link to="/dashboard">
+                    <Button variant="ghost" className="text-blue-600 font-bold">
+                      Admin
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link to="/learner-dashboard">
+                    <Button variant="ghost" className="text-blue-600 font-bold">
+                      Portal
+                    </Button>
+                  </Link>
+                )}
                 <Button onClick={handleLogout} variant="outline" className="text-gray-700 hover:border-red-200 hover:text-red-600">
                   Logout
                 </Button>
@@ -130,16 +136,20 @@ const Header = () => {
               <div className="flex flex-col space-y-2 pt-4 border-t">
                 {isLoggedIn ? (
                   <>
-                    <Link to="/learner-dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full text-blue-600 border-blue-100 font-bold">
-                        Learner Portal
-                      </Button>
-                    </Link>
-                    <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full text-gray-700">
-                        Admin Dashboard
-                      </Button>
-                    </Link>
+                  <>
+                    {userRole === 'creator' ? (
+                      <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full text-gray-700">
+                          Admin Dashboard
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link to="/learner-dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full text-blue-600 border-blue-100 font-bold">
+                          My Academy
+                        </Button>
+                      </Link>
+                    )}
                     <Button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} variant="outline" className="w-full text-red-600 border-red-100">
                       Logout
                     </Button>

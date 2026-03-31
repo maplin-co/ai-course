@@ -41,7 +41,12 @@ const Signup = () => {
             if (error) throw error;
 
             if (data?.user) {
-                setIsSignedUp(true);
+                if (role === 'creator' && plan !== 'basic') {
+                    // Redirect to checkout for paid plans
+                    navigate(`/checkout?plan=${plan}&email=${email}&user_id=${data.user.id}`);
+                } else {
+                    setIsSignedUp(true);
+                }
             }
         } catch (error) {
             console.error('Signup error:', error);
@@ -50,6 +55,42 @@ const Signup = () => {
             setLoading(false);
         }
     };
+
+    // Auto-login listener for cross-device verification
+    useEffect(() => {
+        if (!isSignedUp || !email) return;
+
+        const channel = supabase.channel(`signup-confirm:${email}`);
+        channel.on('broadcast', { event: 'confirmed' }, async () => {
+            console.log("PC: Received confirmation from other device!");
+            // Automatically sign in
+            const { data, error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (!loginError && data?.session) {
+                const user = data.user;
+                localStorage.setItem('token', data.session.access_token);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userName', user.user_metadata?.full_name || 'User');
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userId', user.id);
+                localStorage.setItem('userRole', user.user_metadata?.role || 'learner');
+
+                const role = user.user_metadata?.role || 'learner';
+                if (role === 'creator') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/learner-dashboard');
+                }
+            }
+        }).subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [isSignedUp, email, password, navigate]);
 
     return (
         <div className="bg-gray-50 flex min-h-screen">
@@ -178,19 +219,26 @@ const Signup = () => {
                                 )}
                                 
                                 {role === 'creator' && (
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="grid grid-cols-3 gap-2 mb-4">
                                         <label className="relative cursor-pointer">
                                             <input type="radio" name="plan" className="peer hidden" checked={plan === 'basic'} onChange={() => setPlan('basic')} />
-                                            <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                                <p className="font-bold text-gray-900 text-sm">Basic Trial</p>
+                                            <div className="p-3 border-2 border-gray-100 rounded-xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all h-full">
+                                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Trial</p>
+                                                <p className="font-bold text-gray-900 text-[11px]">7-Day Free</p>
                                             </div>
                                         </label>
                                         <label className="relative cursor-pointer">
-                                            <input type="radio" name="plan" className="peer hidden" checked={plan === 'pro'} onChange={() => setPlan('pro')} />
-                                            <div className="p-4 border-2 border-gray-100 rounded-2xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan</p>
-                                                <p className="font-bold text-gray-900 text-sm">Pro Trial</p>
+                                            <input type="radio" name="plan" className="peer hidden" checked={plan === 'standard'} onChange={() => setPlan('standard')} />
+                                            <div className="p-3 border-2 border-gray-100 rounded-xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all h-full">
+                                                <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">Plan</p>
+                                                <p className="font-bold text-gray-900 text-[11px]">Standard</p>
+                                            </div>
+                                        </label>
+                                        <label className="relative cursor-pointer">
+                                            <input type="radio" name="plan" className="peer hidden" checked={plan === 'premium'} onChange={() => setPlan('premium')} />
+                                            <div className="p-3 border-2 border-gray-100 rounded-xl peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all h-full">
+                                                <p className="text-[8px] font-black text-purple-400 uppercase tracking-widest mb-1">Plan</p>
+                                                <p className="font-bold text-gray-900 text-[11px]">Premium</p>
                                             </div>
                                         </label>
                                     </div>

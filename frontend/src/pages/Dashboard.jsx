@@ -16,14 +16,48 @@ const Dashboard = () => {
         totalRevenue: 0,
         siteVisits: '0'
     });
+    const [profile, setProfile] = useState(null);
+    const [isTrialExpired, setIsTrialExpired] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        if (!loggedIn) {
-            navigate('/login');
-            return;
-        }
+        const checkAccess = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'learner';
+
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+
+            const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            setProfile(profileData);
+
+            // Access Logic
+            if (role !== 'creator') {
+                navigate('/learner-dashboard');
+                return;
+            }
+
+            // Trial Expiration Logic
+            const now = new Date();
+            const trialEnd = new Date(profileData?.trial_ends_at);
+            const expired = profileData?.plan === 'basic' && now > trialEnd;
+            setIsTrialExpired(expired);
+
+            // If on a paid plan but status isn't active, redirect to checkout
+            if (profileData?.plan !== 'basic' && profileData?.subscription_status !== 'active') {
+                navigate(`/checkout?plan=${profileData.plan}&email=${user.email}&user_id=${user.id}`);
+                return;
+            }
+        };
+
+        checkAccess();
 
         const fetchCourses = async () => {
             try {
@@ -69,6 +103,27 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 pt-20">
             <Header />
+            
+            {isTrialExpired && (
+                <div className="fixed inset-0 z-[60] bg-gray-900/40 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-10 text-center animate-in zoom-in duration-500">
+                        <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                            <Sparkles className="text-orange-600" size={40} />
+                        </div>
+                        <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter uppercase italic">Trial Expired</h2>
+                        <p className="text-gray-500 font-medium mb-10 leading-relaxed italic uppercase text-[10px] tracking-widest px-4">
+                            Your 7-day trial of LearnFlow has ended. Upgrade now to preserve your academy and continue scaling your business.
+                        </p>
+                        <div className="space-y-4">
+                            <Link to="/signup?role=creator" className="block w-full py-5 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
+                                Upgrade Plan Now <ArrowRight size={20} />
+                            </Link>
+                            <button onClick={() => navigate('/login')} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-900">Sign in to another account</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                     <div>

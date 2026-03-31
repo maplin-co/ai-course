@@ -20,10 +20,23 @@ const Checkout = () => {
 
     const searchParams = new URLSearchParams(location.search);
     const courseId = searchParams.get('course_id');
-    const type = searchParams.get('type') || 'subscription'; // 'subscription' or 'certificate'
+    const planId = searchParams.get('plan');
+    const userId = searchParams.get('user_id');
+    const type = searchParams.get('type') || (planId ? 'subscription' : 'certificate'); 
+
+    const planPrices = {
+        standard: { title: "Standard Academy Plan", price: 499, description: "Full creator tools + 5 courses" },
+        premium: { title: "Premium Academy Plan", price: 999, description: "Unlimited everything + AI scaling" }
+    };
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchOrderData = async () => {
+            if (planId && planPrices[planId]) {
+                setCourseData(planPrices[planId]);
+                setFetching(false);
+                return;
+            }
+
             if (!courseId) {
                 setFetching(false);
                 return;
@@ -39,14 +52,23 @@ const Checkout = () => {
                 setCourseData(data);
             } catch (err) {
                 console.error("Fetch course error:", err);
-                // Fallback demo
                 setCourseData({ title: "AI Art Mastery", price: 1500 });
             } finally {
                 setFetching(false);
             }
         };
-        fetchCourse();
-    }, [courseId]);
+        fetchOrderData();
+
+        // Cross-device sync: If user confirms email on mobile, auto-refresh session here
+        if (userId) {
+            const channel = supabase.channel(`signup-confirm-checkout:${userId}`);
+            channel.on('broadcast', { event: 'confirmed' }, () => {
+                console.log("Checkout: User confirmed email on other device. Polling session...");
+                window.location.reload(); // Simplest way to refresh auth state in current implementation
+            }).subscribe();
+            return () => supabase.removeChannel(channel);
+        }
+    }, [courseId, planId, userId]);
 
     const exchangeRate = 13.5;
     const computePrice = () => {
@@ -79,29 +101,43 @@ const Checkout = () => {
 
             if (result === "000") {
                 // 2. Perform Post-Payment Action in Supabase
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user && courseId) {
-                    if (type === 'certificate') {
-                        // Mark Certificate as Paid in enrollments table
+                const activeUserId = userId || (await supabase.auth.getUser()).data.user?.id;
+                
+                if (activeUserId) {
+                    if (planId) {
+                        // Update Profile Plan
                         await supabase
-                            .from('enrollments')
-                            .update({ is_paid: true })
-                            .eq('user_id', user.id)
-                            .eq('course_id', courseId);
-                    } else {
-                        // Regular Enrollment
-                        await supabase
-                            .from('enrollments')
-                            .upsert({
-                                user_id: user.id,
-                                course_id: courseId
-                            });
+                            .from('profiles')
+                            .update({ 
+                                plan: planId,
+                                subscription_status: 'active'
+                            })
+                            .eq('id', activeUserId);
+                    } else if (courseId) {
+                        if (type === 'certificate') {
+                            await supabase
+                                .from('enrollments')
+                                .update({ is_paid: true })
+                                .eq('user_id', activeUserId)
+                                .eq('course_id', courseId);
+                        } else {
+                            await supabase
+                                .from('enrollments')
+                                .upsert({
+                                    user_id: activeUserId,
+                                    course_id: courseId
+                                });
+                        }
                     }
                 }
 
                 // 3. User Notification & Redirect
                 alert(`Payment Initialized: ${resultExplanation}\nCurrency: ${currency}\nAmount: ${finalPrice}`);
-                navigate('/learner-dashboard');
+                if (planId) {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/learner-dashboard');
+                }
             } else {
                 alert(`Payment creation failed: ${resultExplanation}`);
             }

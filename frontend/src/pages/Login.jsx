@@ -23,17 +23,24 @@ const Login = () => {
             });
 
             if (signInError) throw signInError;
-
+            
             if (data?.session) {
+
                 const user = data.user;
                 localStorage.setItem('token', data.session.access_token);
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userName', user.user_metadata?.full_name || 'User');
                 localStorage.setItem('userEmail', user.email);
                 localStorage.setItem('userId', user.id);
-                localStorage.setItem('userRole', user.user_metadata?.role || 'learner');
+                
+                const role = user.user_metadata?.role || 'learner';
+                localStorage.setItem('userRole', role);
 
-                navigate('/learner-dashboard');
+                if (role === 'creator') {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/learner-dashboard');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);

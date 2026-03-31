@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   full_name text,
   role text DEFAULT 'learner' CHECK (role IN ('learner', 'creator', 'admin')),
   plan text DEFAULT 'basic',
-  trial_ends_at timestamp with time zone,
+  subscription_status text DEFAULT 'pending', 
+  total_credits integer DEFAULT 0,
+  trial_ends_at timestamp with time zone DEFAULT now() + interval '7 days',
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -52,12 +54,13 @@ CREATE POLICY "Users can update their own enrollments." ON public.enrollments
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, role, plan)
+  INSERT INTO public.profiles (id, full_name, role, plan, subscription_status)
   VALUES (
     new.id, 
     new.raw_user_meta_data->>'full_name', 
     COALESCE(new.raw_user_meta_data->>'role', 'learner'),
-    COALESCE(new.raw_user_meta_data->>'plan', 'basic')
+    COALESCE(new.raw_user_meta_data->>'plan', 'basic'),
+    CASE WHEN COALESCE(new.raw_user_meta_data->>'plan', 'basic') = 'basic' THEN 'active' ELSE 'pending' END
   );
   RETURN new;
 END;
